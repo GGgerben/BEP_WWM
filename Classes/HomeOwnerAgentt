@@ -4,8 +4,7 @@ class Agent:
         """
         Represents a household agent.
 
-        Parameters:
-        -----------
+        Variables:
         ID : int
             Unique identifier per agent.
         wealth : float
