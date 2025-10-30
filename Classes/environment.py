@@ -7,10 +7,10 @@ class Environment():
         social budgets, and policy effects over multiple rounds.
 
         Attributes:        
-        geo_risk_map (dict): Maps location risk type (e.g., 'high', 'low') to base hazard probability.
-        social_budget (dict): Maps social/wealth categories to their initial budget.
-        policy_parameters (dict): Contains parameters for subsidy rates, insurance adjustments, etc.
-        round_number (int): Current simulation round.
+            geo_risk_map (dict): Maps location risk type to base hazard probability.
+            social_budget (dict): Maps social/wealth categories to their initial budget.
+            policy_parameters (dict): Contains parameters for subsidy rates, insurance adjustments, etc.
+            round_number (int): Current simulation round.
         """
 
         self.round_number = round_number
