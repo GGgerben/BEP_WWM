@@ -1,24 +1,18 @@
 class Agent:
     def __init__(self, ID, wealth, risk_perception, experience_level,
                  self_efficacy, outcome_efficacy, intention):
+        
         """
         Represents a household agent.
 
-        Variables:
-        ID : int
-            Unique identifier per agent.
-        wealth : float
-            Initial budget (€), determined by social class (rijk/gemiddeld/arm).
-        risk_perception : float
-            Perceived flood probability and damage risk (0–1).
-        experience_level : str
-            Flood experience: 'Nooit', 'Een keer', or 'Vaker'.
-        self_efficacy : float
-            Belief in own ability to implement measures (0–1).
-        outcome_efficacy : float
-            Belief that measures effectively reduce damage (0–1).
-        intention : float
-            Motivational level derived from PMT and MAP (0–1).
+        Attributes:
+            ID (int): Unique identifier per agent.
+            wealth (float): Initial budget in euros (€), determined by social class ('rijk', 'gemiddeld', or 'arm').
+            risk_perception (float): Perceived flood probability and damage risk (0–1).
+            experience_level (str): Flood experience: 'Nooit', 'Een keer', or 'Vaker'.
+            self_efficacy (float): Belief in own ability to implement measures (0–1).
+            outcome_efficacy (float): Belief that measures effectively reduce damage (0–1).
+            intention (float): Motivational level derived from PMT and MAP (0–1).
         """
 
         self.ID = ID
