@@ -1,3 +1,5 @@
+import random
+
 class Environment():
     
     def __init__(self, geo_risk_map, social_budget, policy_parameters, round_number = 0):
@@ -17,6 +19,26 @@ class Environment():
         self.geo_risk_map = geo_risk_map
         self.social_budget = social_budget
         self.policy_parameters = policy_parameters
+
+    def floods(self):
+        
+        """
+        Simulates the occurrence of rain and river floods.
+
+        Rain flood:  1 in 10 chance
+        River flood: 1 in 12 chance
+        """
+        
+        rain_flood = random.randint(1, 10) == 1
+        river_flood = random.randint(1, 12) == 1
+
+        result = {
+            "rain_flood": rain_flood,
+            "river_flood": river_flood
+        }
+
+        return result
+
     
     def next_round(self):
         """
