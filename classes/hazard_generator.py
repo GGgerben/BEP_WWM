@@ -12,4 +12,4 @@ def floods():
     rain = random.randint(1, 10)
     river = random.randint(1, 12)
 
-    return {"rain": rain, "river": river}
+    return {"rain_damage": rain, "river_damage": river}

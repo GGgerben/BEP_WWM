@@ -1,5 +1,5 @@
 class Measure():
-    def __init__(self, name, cost, durability, protection_rain, protection_river, satisfaction, maintenance_cost=0):
+    def __init__(self, name, cost, durability, rain_protection, river_protection, satisfaction, maintenance_cost=0):
         
         """
         Represents a flood protection or adaptation measure that players can buy 
@@ -19,28 +19,26 @@ class Measure():
         self.name = name
         self.cost = cost
         self.durability = durability
-        self.protection_rain = protection_rain
-        self.protection_river = protection_river
+        self.protection_rain = rain_protection
+        self.protection_river = river_protection
         self.satisfaction = satisfaction
         self.maintenance_cost = maintenance_cost
         self.remaining_rounds = durability
 
+    def __repr__(self):
+        return f"Measure({self.name!r})"
+
+
 measures = [
-    Measure("Personal improvements",         cost= 8000, durability=1, protection_rain=0, protection_river=0, satisfaction=1),
-    Measure("Modest house renovations",      cost= 8000, durability=1, protection_rain=0, protection_river=0, satisfaction=1),
-    Measure("Structual house changes",       cost= 8000, durability=1, protection_rain=0, protection_river=0, satisfaction=1),
-    Measure("Water pump",                    cost= 6000, durability=4, protection_rain=1, protection_river=0, satisfaction=0),
-    Measure("Self-activating wall",          cost=12000, durability=4, protection_rain=1, protection_river=1, satisfaction=0),
-    Measure("Sandbags",                      cost= 3000, durability=4, protection_rain=0, protection_river=1, satisfaction=0),
-    Measure("Waterproofing walls & floors",  cost=20000, durability=4, protection_rain=1, protection_river=1, satisfaction=1),
-    Measure("Green garden",                  cost=12000, durability=4, protection_rain=1, protection_river=0, satisfaction=1),
-    Measure("Rain barrel",                   cost=20000, durability=4, protection_rain=1, protection_river=0, satisfaction=1),
-    Measure("Flood insurance",               cost=15000, durability=4, protection_rain=1, protection_river=0, satisfaction=0),
+    Measure("Personal improvements",         cost= 8000, durability=1, rain_protection=0, river_protection=0, satisfaction=1),
+    Measure("Modest house renovations",      cost= 8000, durability=1, rain_protection=0, river_protection=0, satisfaction=1),
+    Measure("Structual house changes",       cost= 8000, durability=1, rain_protection=0, river_protection=0, satisfaction=1),
+    Measure("Water pump",                    cost= 6000, durability=4, rain_protection=1, river_protection=0, satisfaction=0),
+    Measure("Self-activating wall",          cost=12000, durability=4, rain_protection=1, river_protection=1, satisfaction=0),
+    Measure("Sandbags",                      cost= 3000, durability=4, rain_protection=0, river_protection=1, satisfaction=0),
+    Measure("Waterproofing walls & floors",  cost=20000, durability=4, rain_protection=1, river_protection=1, satisfaction=1),
+    Measure("Green garden",                  cost=12000, durability=4, rain_protection=1, river_protection=0, satisfaction=1),
+    Measure("Rain barrel",                   cost=20000, durability=4, rain_protection=1, river_protection=0, satisfaction=1),
+    Measure("Flood insurance",               cost=15000, durability=4, rain_protection=1, river_protection=0, satisfaction=0),
 ]
 
-# testen
-# if __name__ == "__main__":
-#     print(f"Number of measures: {len(measures)}")
-
-#     for m in measures:
-#         print(f"{m.name}: cost €{m.cost}, rain={m.protection_rain}, river={m.protection_river}, satisfaction={m.satisfaction}")

@@ -1,4 +1,4 @@
-import pandas as pd
+import pandas as pd # type: ignore
 import ast
 
 # Read Excel file with houses
@@ -12,6 +12,8 @@ if "active_measures" in df.columns:
 houses_dict = {
     int(row["house_id"]): {
         "value": row["value"],
+        "rain_protection": row["rain_protection"],
+        "river_protection": row["river_protection"],
         "preferred_rating": row["preferred_rating"],
         "active_measures": row["active_measures"],
         "available": row["available"],
