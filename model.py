@@ -26,13 +26,9 @@ if __name__ == "__main__":
     test_agent.pay_tax()
     test_agent.buy_improvements(measures)
 
-    print(test_agent.wealth)
     flood_results = floods()
-    print(test_agent.protection)
-    print(flood_results)
     test_agent.check_damage(flood_results)
-    print(test_agent.damage_history)
-    print(test_agent.wealth)
+
 
   
     # print(test_agent.protection)
