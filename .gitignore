@@ -1,0 +1,11 @@
+# Ignore Visual Studio and Python cache folders
+.vs/
+.vscode/
+__pycache__/
+*.pyc
+*.pyo
+*.vsidx
+*.user
+*.suo
+*.cache
+*.log
