@@ -126,7 +126,7 @@ class Agent:
         self.wealth -= total
 
         # Save damage history
-        self.damage_history.append({"rain": rain_diff, "river": river_diff, "cost": total})
+        self.damage_history.append({"rain": rain_diff, "river": river_diff, "damage_cost": total})
 
     
     def __repr__(self):
