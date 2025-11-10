@@ -1,56 +1,37 @@
+from homeowner_agent import Agent
+from measures import measures
 import matplotlib.pyplot as plt
 
-class Visualization:
-    """
-    Helper class for visualizing results from the ABM.
-    Supports: bar chart of measure adoption counts or rates.
-    """
+# 1️⃣  Maak een paar testagents aan
+a1 = Agent(1, 1000, 1000, 0.5, "Een keer", 0.7, 0.8, 0.6, "huis1")
+a2 = Agent(2, 800, 800, 0.3, "Nooit", 0.4, 0.6, 0.2, "huis2")
+a3 = Agent(3, 2000, 2000, 0.9, "Vaker", 0.9, 0.9, 0.9, "huis3")
 
-    def __init__(self, figsize=(10, 5)):
-        self.figsize = figsize
+# 2️⃣  Laat ze wat maatregelen adopteren (nepdata, gewoon om te testen)
+a1.adopted_measures = [measures[0]]
+a2.adopted_measures = [measures[0], measures[1]]
+a3.adopted_measures = [measures[1]]
 
-    def plot_measure_adoption(self, agents, measures, title="Adoption per measure", save_path=None):
-        """
-        Creates a bar chart showing adoption count (or rate) per measure.
+agents = [a1, a2, a3]
 
-        Parameters
-        ----------
-        agents : list[Agent]
-            List of Agent objects from the simulation.
-        measures : list[Measure]
-            The original list of available measures (for labels).
-        title : str
-            Title above the chart.
-        save_path : str | None
-            If given, saves the figure to that path instead of showing it.
-        """
+# 3️⃣  Tel hoeveel keer elke maatregel is gekozen
+adoption_counts = {m.name: 0 for m in measures}
 
-        # 1. Initialize counter for all measures
-        adoption_counts = {m.name: 0 for m in measures}
+for agent in agents:
+    for adopted in getattr(agent, "adopted_measures", []):
+        if adopted.name in adoption_counts:
+            adoption_counts[adopted.name] += 1
 
-        # 2. Count adoptions from agents
-        for agent in agents:
-            for m in agent.adopted_measures:
-                if m.name in adoption_counts:
-                    adoption_counts[m.name] += 1
-                else:
-                    adoption_counts[m.name] = 1  # handle unknown measures safely
+# 4️⃣  Plot een simpele staafgrafiek
+x = list(adoption_counts.keys())
+y = list(adoption_counts.values())
 
-        # 3. Compute adoption rate (% of agents)
-        total_agents = len(agents)
-        adoption_rates = {name: (count / total_agents) * 100 for name, count in adoption_counts.items()}
+plt.figure(figsize=(7, 4))
+plt.bar(x, y, color="lightgreen")
+plt.title("Aantal adopties per maatregel (test)")
+plt.xlabel("Measures")
+plt.ylabel("Aantal adopties")
+plt.xticks(rotation=30, ha="right")
 
-        # 4. Plot
-        plt.figure(figsize=self.figsize)
-        plt.bar(adoption_rates.keys(), adoption_rates.values())
-        plt.xticks(rotation=45, ha='right')
-        plt.ylabel("Adoption rate (%)")
-        plt.title(title)
-        plt.tight_layout()
-
-        # 5. Show or save
-        if save_path:
-            plt.savefig(save_path, dpi=300)
-            plt.close()
-        else:
-            plt.show()
+plt.tight_layout()
+plt.show()
