@@ -20,15 +20,11 @@ if __name__ == "__main__":
         intention=1,
         house= None)
     
-
-    test_agent.get_income()
-    test_agent.buy_house(houses_dict)
-    test_agent.pay_tax()
-    test_agent.buy_improvements(measures)
-
+    # Get flood results
     flood_results = floods()
-    test_agent.check_damage(flood_results)
 
+    # Execute one simulation step
+    test_agent.step(houses_dict, measures, flood_results)
 
   
     # print(test_agent.protection)

@@ -128,6 +128,18 @@ class Agent:
         # Save damage history
         self.damage_history.append({"rain": rain_diff, "river": river_diff, "damage_cost": total})
 
+    def step(self, houses_dict, measures, flood_results):
+        
+        """
+        Executes one simulation step where the agent earns income, buys a house, pays taxes, and invests in improvements.
+        """
+
+        self.get_income()
+        self.buy_house(houses_dict)
+        self.pay_tax()
+        self.buy_improvements(measures)
+        self.check_damage(flood_results)
+
     
     def __repr__(self):
 
