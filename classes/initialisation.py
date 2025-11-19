@@ -2,9 +2,8 @@ from classes.homeowner_agent import Agent # type: ignore
 
 def initialise_agents():
     """
-    Creates and returns 8 agents based on the game table.
-    Wealth = start savings.
-    Living costs and start debt are ignored.
+    Creates and returns 8 agents based on the game table
+    Wealth = start savings
     """
 
     players_data = [
