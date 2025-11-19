@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import random
 import matplotlib.pyplot as plt
-from homeowner_agent import Agent
+from classes.homeowner_agent import Agent
 
 
 class PopulationGeneratorRandom:
@@ -19,8 +19,8 @@ class PopulationGeneratorRandom:
         exp_levels = ["Nooit", "Een keer", "Vaker"]
 
         for i in range(1, n_agents + 1):
-            wealth = random.uniform(5_000, 25_000)              # €5k–25k
-            income = random.uniform(1_200, 3_000)               # €1.2k–3k
+            wealth = random.uniform(5_000, 25_000)              # ï¿½5kï¿½25k
+            income = random.uniform(1_200, 3_000)               # ï¿½1.2kï¿½3k
             risk_perception = random.uniform(0.1, 0.9)
             experience_level = random.choice(exp_levels)
             self_efficacy = random.uniform(0.3, 0.9)
@@ -81,9 +81,9 @@ class PopulationGeneratorRandom:
         self.agents = []
 
 
-# ====== TESTJE ======
-if __name__ == "__main__":
-    pop = PopulationGeneratorRandom()
-    pop.create_population(100)        # hier aangeven hoeveel agenten we willen
-    pop.plot_population_size()        # 1: laat zien hoeveel agenten er zijnn
-    pop.plot_wealth_distribution()    # 2: laat de verdeling van welvaart zien
+# # ====== TESTJE ======
+# if __name__ == "__main__":
+#     pop = PopulationGeneratorRandom()
+#     pop.create_population(100)        # hier aangeven hoeveel agenten we willen
+#     pop.plot_population_size()        # 1: laat zien hoeveel agenten er zijnn
+#     pop.plot_wealth_distribution()    # 2: laat de verdeling van welvaart zien
