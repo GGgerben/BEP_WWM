@@ -30,15 +30,15 @@ class Measure():
 
 
 measures = [
-    # Measure("Personal improvements",         cost= 8000, durability=1, rain_protection=0, river_protection=0, satisfaction=1),
-    # Measure("Modest house renovations",      cost= 8000, durability=1, rain_protection=0, river_protection=0, satisfaction=1),
-    # Measure("Structual house changes",       cost= 8000, durability=1, rain_protection=0, river_protection=0, satisfaction=1),
-    # Measure("Water pump",                    cost= 6000, durability=1, rain_protection=1, river_protection=0, satisfaction=0),
-    # Measure("Self-activating wall",          cost=12000, durability=4, rain_protection=1, river_protection=1, satisfaction=0),
-    # Measure("Sandbags",                      cost= 3000, durability=4, rain_protection=0, river_protection=1, satisfaction=0),
-    # Measure("Waterproofing walls & floors",  cost=20000, durability=4, rain_protection=1, river_protection=1, satisfaction=1),
-    # Measure("Green garden",                  cost=12000, durability=4, rain_protection=1, river_protection=0, satisfaction=1),
-    # Measure("Rain barrel",                   cost=20000, durability=4, rain_protection=1, river_protection=0, satisfaction=1),
+    Measure("Personal improvements",         cost= 8000, durability=1, rain_protection=0, river_protection=0, satisfaction=1),
+    Measure("Modest house renovations",      cost= 8000, durability=1, rain_protection=0, river_protection=0, satisfaction=1),
+    Measure("Structual house changes",       cost= 8000, durability=1, rain_protection=0, river_protection=0, satisfaction=1),
+    Measure("Water pump",                    cost= 6000, durability=1, rain_protection=1, river_protection=0, satisfaction=0),
+    Measure("Self-activating wall",          cost=12000, durability=4, rain_protection=1, river_protection=1, satisfaction=0),
+    Measure("Sandbags",                      cost= 3000, durability=4, rain_protection=0, river_protection=1, satisfaction=0),
+    Measure("Waterproofing walls & floors",  cost=20000, durability=4, rain_protection=1, river_protection=1, satisfaction=1),
+    Measure("Green garden",                  cost=12000, durability=4, rain_protection=1, river_protection=0, satisfaction=1),
+    Measure("Rain barrel",                   cost=20000, durability=4, rain_protection=1, river_protection=0, satisfaction=1),
 ]
 
 # Measure("Flood insurance",               cost=15000, durability=4, rain_protection=1, river_protection=0, satisfaction=0)

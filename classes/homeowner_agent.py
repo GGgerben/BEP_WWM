@@ -29,11 +29,12 @@ class Agent:
 
         # Dynamic attributes updated during simulation
         self.adopted_measures = []     # List of Measure objects
-        self.satisfaction = 0.0        # Updated after each round
+        self.satisfaction = 5       # Updated after each round
         self.damage_history = []       # List of booleans (True = flooded)
         self.max_mortgage = self.wealth * 10
         self.mortgage = None
         self.protection = {"rain_protection": 0, "river_protection": 0}
+        self.satisfaction_history = []
     
     def get_income(self):
 
@@ -198,7 +199,17 @@ class Agent:
                     # Update protection based on the house 
                     self.protection["rain_protection"] += info.get("rain_protection", 0)
                     self.protection["river_protection"] += info.get("river_protection", 0)
-                    
+
+                    # Satisfaction penalty when the house rating is lower than preferred rating
+                    house_rating = info.get("preferred_rating", 0)
+                    rating_diff = max(0, self.preferred_rating - house_rating)
+
+                    if rating_diff > 0:
+                        # Each point below preferred gives –1 satisfaction
+                        self.satisfaction -= rating_diff
+                        print(f"[PMT] Agent {self.ID} – Satisfaction -{rating_diff} due to low house rating "
+                            f"(preferred={self.preferred_rating}, house={house_rating})")
+                                        
                     # Return suitable house
                     return house_id
             
@@ -206,12 +217,10 @@ class Agent:
             return None
         
         # Case 2: Relocation (PMT)
-        #Onnly allow relocation in round 4
+        #Only allow relocation in round 4
         if current_round is None or current_round != relocation_round:
             # Already owns a house and it's not relocation round → do nothing
             return None
-        
-        # print(f"[DEBUG] Agent {self.ID}: relocation check in round {current_round}")
         
         current_house_info = houses_dict[self.house]
         risk_current = self.compute_flood_probability(current_house_info)
@@ -283,7 +292,7 @@ class Agent:
             "river_protection": self.protection.get("river_protection", 0),
         }
 
-        # Floor probabolity current protection
+        # Floor probability current protection
         flood_prob = self.compute_flood_probability(current_info)
 
         # Flood experience factor
@@ -335,11 +344,7 @@ class Agent:
         # Calculate risk reduction
         risk_reduction = max(0.0, risk_current - risk_new)
 
-        # # Add satisfaction effects
-        # sat_effect = 1.0 if getattr(measure, "satisfaction", 0) == 1 else 0.0
-
-        # # Total response efficacy
-        # response_efficacy = risk_reduction + sat_effect
+        # Add satisfaction effects
 
         sat_effect = 0.5 if getattr(measure, "satisfaction", 0) == 1 else 0.0
 
@@ -374,16 +379,6 @@ class Agent:
 
         pm = (threat + coping) / 2.0
 
-        # print(
-        #         f"[PMT] Agent {self.ID} – Measure '{measure.name}': "
-        #         f"Threat={threat:.2f}, Coping={coping:.2f}, PM={pm:.2f}, "
-        #         f"Cost={measure.cost}, "
-        #         f"ΔRain={getattr(measure,'protection_rain',0)}, "
-        #         f"ΔRiver={getattr(measure,'protection_river',0)}, "
-        #         f"Satisfaction={getattr(measure,'satisfaction',0)}"
-        #     )
-
-
         return max(0.0, min(pm, 1.0))
 
         
@@ -415,13 +410,10 @@ class Agent:
 
             # Decide on adoption using a threshold
             if pm <= measure_threshold:
-                # print(f"[PMT] Agent {self.ID} – SKIP '{measure.name}' (PM={pm:.2f} <= {measure_threshold})")
                 continue
 
             # Check affordability
             if self.wealth < measure.cost:
-                # print(f"[PMT] Agent {self.ID} – CANNOT AFFORD '{measure.name}' "
-                #         f"(wealth={self.wealth}, cost={measure.cost})")
                 continue
 
             # Pay for the measure
@@ -437,8 +429,6 @@ class Agent:
             # Update satisfaction (+1 or 0 per measure)
             self.satisfaction += getattr(measure, "satisfaction", 0)
 
-            # print(f"[PMT] Agent {self.ID} – BOUGHT '{measure.name}', new wealth={self.wealth}")
-
     def check_damage(self, flood_results):
 
         """
@@ -451,7 +441,16 @@ class Agent:
         # calculate difference between damage and protection (never negative)
         rain_diff  = max(0, flood_results.get("rain_damage", 0)  - self.protection["rain_protection"])
         river_diff = max(0, flood_results.get("river_damage", 0) - self.protection["river_protection"])
+
+        # Decrease satisfaction if flooded
+        if rain_diff > 0:
+            self.satisfaction -= rain_diff
+            print("satisfaction -1, rain flood")
         
+        if river_diff > 0:
+            self.satisfaction -= river_diff
+            print("satisfaction -1, river flood")
+
         # Calculate total costs
         total = damage_costs * (rain_diff + river_diff)
 
@@ -481,7 +480,9 @@ class Agent:
         # If agent goes into debt, reduce satisfaction
         if self.wealth < 0:
             self.satisfaction -= 1
-    
+
+        self.satisfaction_history.append(self.satisfaction)
+
     def __repr__(self):
 
         return (f"Agent(ID={self.ID}, Wealth={self.wealth}, "

@@ -3,11 +3,14 @@ from classes.homeowner_agent import Agent # type: ignore
 from classes.measures import measures # type: ignore
 from classes.hazard_generator import floods # type: ignore
 from classes.initialisation import initialise_agents # type: ignore
+from classes.initialisation import plot_satisfaction_over_time # type: ignore
+from classes.initialisation import plot_floods_per_round# type: ignore
 
 from classes.population_generator import PopulationGeneratorRandom
 
 # Import houses
 from data.houses_dict import houses_dict # type: ignore
+
 
 if __name__ == "__main__":
 
@@ -74,6 +77,10 @@ if __name__ == "__main__":
             print(f"Agent {agent.ID} house after {round_nr}: {agent.house}, protection: {agent.protection}, wealth: {agent.wealth}, satisfaction: {agent.satisfaction},")
             print(len(agent.adopted_measures))
             # print(agent.adopted_measures)
+        
+    plot_satisfaction_over_time(agents)  
+    plot_floods_per_round(agents) 
+    
 
     # print(houses_dict)
     # # Visualisations
@@ -81,6 +88,7 @@ if __name__ == "__main__":
     # pop.agents = agents          
     # pop.plot_population_size()
     # pop.plot_wealth_distribution()
+    
 
 
 
