@@ -11,25 +11,46 @@ from data.houses_dict import houses_dict # type: ignore
 
 if __name__ == "__main__":
 
-
-    # Initialize test agent
     agents = initialise_agents()
-    
-    
-    # Get flood results
-    flood_results = floods()
 
-    # Execute one simulation step
-    for agent in agents:
-        agent.step(houses_dict, measures, flood_results)
-        print(agent.house)
-        print(agent.adopted_measures)
+    # houses_dict = {
+    #     "N07": {
+    #         "value": 200000,
+    #         "available": True,   # gekocht in ronde 1
+    #         "preferred_rating": 0.5,
+    #         "rain_protection": 0,
+    #         "river_protection": 0,
+    #         "available_round": 1,
+    #     },
+    #     "N08": {
+    #         "value": 190000,
+    #         "available": True,
+    #         "preferred_rating": 0.5,
+    #         "rain_protection": 3,
+    #         "river_protection": 2,
+    #         "available_round": 4,
+    #     },
+    # }
+    
 
-    # Visualisations
-    pop = PopulationGeneratorRandom()
-    pop.agents = agents          
-    pop.plot_population_size()
-    pop.plot_wealth_distribution()
+    for round_nr in range(1, 5):   # rondes 1 t/m 4
+        print(f"\n=== ROUND {round_nr} ===")
+        flood_results = floods()
+
+        for agent in agents:
+            agent.step(houses_dict, measures, flood_results, current_round=round_nr)
+            # print(agent.adopted_measures)
+            # print(len(agent.adopted_measures))
+            print(f"Agent {agent.ID} house after {round_nr}: {agent.house}, protection: {agent.protection}, wealth: {agent.wealth}, floods: {agent.damage_history}, satisfaction: {agent.satisfaction}")
+
+    print(houses_dict)
+    # # Visualisations
+    # pop = PopulationGeneratorRandom()
+    # pop.agents = agents          
+    # pop.plot_population_size()
+    # pop.plot_wealth_distribution()
+
+
 
 
 

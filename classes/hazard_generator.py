@@ -13,3 +13,6 @@ def floods():
     river = random.randint(1, 12)
 
     return {"rain_damage": rain, "river_damage": river}
+
+
+
