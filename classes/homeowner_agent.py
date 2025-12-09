@@ -41,6 +41,16 @@ class Agent:
         Function that allows an agent to get income.
         """
         self.wealth += self.income
+
+    def pay_tax(self):
+
+        """
+        Pays 10% of the current mortgage.
+        """
+
+        payment = 0.1 * self.mortgage
+        self.wealth -= payment
+        self.mortgage -= payment
     
     def compute_flood_probability(self, house_info):
 
@@ -201,7 +211,7 @@ class Agent:
             # Already owns a house and it's not relocation round → do nothing
             return None
         
-        print(f"[DEBUG] Agent {self.ID}: relocation check in round {current_round}")
+        # print(f"[DEBUG] Agent {self.ID}: relocation check in round {current_round}")
         
         current_house_info = houses_dict[self.house]
         risk_current = self.compute_flood_probability(current_house_info)
@@ -257,45 +267,177 @@ class Agent:
     
         # No relocation
         return None 
-        
     
-    def pay_tax(self):
+    def threat_appraisal_measures(self):
 
         """
-        Pays 10% of the current mortgage.
+        Computes the Threat Appraisal for adopting measures (score [0–1]).
+
+        Threat Appraisal = (flood probability + expected damage + flood experience)
+                         – (benefits of doing nothing, e.g. saving money)
         """
 
-        payment = 0.1 * self.mortgage
-        self.wealth -= payment
-        self.mortgage -= payment
+        # Current protection based on house + already adopted measures
+        current_info = {
+            "rain_protection": self.protection.get("rain_protection", 0),
+            "river_protection": self.protection.get("river_protection", 0),
+        }
 
-    def buy_improvements(self, measures):
+        # Floor probabolity current protection
+        flood_prob = self.compute_flood_probability(current_info)
+
+        # Flood experience factor
+        experience = 0.7 * self.flood_experience_factor()
+
+        # Heuristic, poorer agents have higher benefits from not investing
+        # Tuning parameter
+        wealth_scale = 100000
+        money_pressure = 1.0 - (self.wealth / (self.wealth + wealth_scale))
+        money_pressure = max(0.0, min(money_pressure, 1.0))
+        do_nothing_benefits = 0.05 + 0.15 * money_pressure
+        
+        # Calculate threat appraisal
+        threat = flood_prob + experience - do_nothing_benefits
+
+        # Standardize threat appraisal
+        return max(0.0, min(threat, 1.0))
+    
+    def coping_appraisal_measures(self, measure):
+        """
+        Computes the Coping Appraisal for a specific measure (score [0–1]).
+
+        Coping Appraisal = (belief that the measure reduces risk + self-efficacy)
+                         – response costs
+        """
+
+        # Current protection levels
+        current_rain = self.protection.get("rain_protection", 0)
+        current_river = self.protection.get("river_protection", 0)
+
+        current_info = {
+            "rain_protection": current_rain,
+            "river_protection": current_river
+        }
+
+        # Protection with this measure added
+        new_rain = current_rain + getattr(measure, "protection_rain", 0)
+        new_river = current_river + getattr(measure, "protection_river", 0)
+
+        new_info = {
+            "rain_protection": new_rain,
+            "river_protection": new_river
+        }
+
+        # Risk current vs risk after measure
+        risk_current = self.compute_flood_probability(current_info)
+        risk_new = self.compute_flood_probability(new_info)
+
+        # Calculate risk reduction
+        risk_reduction = max(0.0, risk_current - risk_new)
+
+        # # Add satisfaction effects
+        # sat_effect = 1.0 if getattr(measure, "satisfaction", 0) == 1 else 0.0
+
+        # # Total response efficacy
+        # response_efficacy = risk_reduction + sat_effect
+
+        sat_effect = 0.5 if getattr(measure, "satisfaction", 0) == 1 else 0.0
+
+        response_efficacy = max(0.0, min(risk_reduction + sat_effect, 1.0))
+
+        # Check if agent can pay improvement
+        if self.wealth >= measure.cost:
+            self_efficacy = 1.0
+        else:
+            self_efficacy = 0.0
+
+        # Calculate response costs
+        total_budget = max(self.wealth, 1.0)
+        response_cost = measure.cost / total_budget
+        response_cost = max(0.0, min(response_cost, 1.0))
+
+        # Calculate coping appraisal
+        coping = response_efficacy + self_efficacy - response_cost
+
+        # Standardize coping appraisal
+        return max(0.0, min(coping, 1.0))
+    
+    def measures_PM(self, measure):
+        """
+        Computes overall Protection Motivation for adopting a measure.
+        Protection Motivation = average of Threat Appraisal and Coping Appraisal,
+        scaled to [0–1].
+        """
+
+        threat = self.threat_appraisal_measures()
+        coping = self.coping_appraisal_measures(measure)
+
+        pm = (threat + coping) / 2.0
+
+        # print(
+        #         f"[PMT] Agent {self.ID} – Measure '{measure.name}': "
+        #         f"Threat={threat:.2f}, Coping={coping:.2f}, PM={pm:.2f}, "
+        #         f"Cost={measure.cost}, "
+        #         f"ΔRain={getattr(measure,'protection_rain',0)}, "
+        #         f"ΔRiver={getattr(measure,'protection_river',0)}, "
+        #         f"Satisfaction={getattr(measure,'satisfaction',0)}"
+        #     )
+
+
+        return max(0.0, min(pm, 1.0))
+
+        
+    def buy_improvements(self, measures, measure_threshold=0.6):
         
         """
         Buys as many affordable measures as possible from the given list.
         Each measure has a 'cost' attribute.
         """
         
+        # Compute PM for all non adopted measures
+        pm_list = []
         for measure in measures:
 
-            # Skip if this measure is already adopted (based on its name)
+            # Skip if this measure is already adopted
             if any(m.name == measure.name for m in self.adopted_measures):
                 continue
-        
-            if self.wealth >= measure.cost:
-                # Pay for the measure
-                self.wealth -= measure.cost
 
-                # Add the measure to the agent's list
-                self.adopted_measures.append(measure)
+            pm = self.measures_PM(measure)
+            pm_list.append((pm, measure))
 
-                 # Update protections cumulatively
-                self.protection["rain_protection"] += getattr(measure, "protection_rain", 0)
-                self.protection["river_protection"] += getattr(measure, "protection_river", 0)
+        if not pm_list:
+            return
+            
+        # Sort measures by PM descending
+        pm_list.sort(key=lambda x: x[0], reverse=True)
 
-                # Update satisfaction
-                self.satisfaction += getattr(measure, "satisfaction", 0)
+        for pm, measure in pm_list:
 
+            # Decide on adoption using a threshold
+            if pm <= measure_threshold:
+                # print(f"[PMT] Agent {self.ID} – SKIP '{measure.name}' (PM={pm:.2f} <= {measure_threshold})")
+                continue
+
+            # Check affordability
+            if self.wealth < measure.cost:
+                # print(f"[PMT] Agent {self.ID} – CANNOT AFFORD '{measure.name}' "
+                #         f"(wealth={self.wealth}, cost={measure.cost})")
+                continue
+
+            # Pay for the measure
+            self.wealth -= measure.cost
+
+            # Add the measure to the agent's list
+            self.adopted_measures.append(measure)
+
+            # Update protections cumulatively
+            self.protection["rain_protection"] += getattr(measure, "protection_rain", 0)
+            self.protection["river_protection"] += getattr(measure, "protection_river", 0)
+
+            # Update satisfaction (+1 or 0 per measure)
+            self.satisfaction += getattr(measure, "satisfaction", 0)
+
+            # print(f"[PMT] Agent {self.ID} – BOUGHT '{measure.name}', new wealth={self.wealth}")
 
     def check_damage(self, flood_results):
 
@@ -336,6 +478,9 @@ class Agent:
             self.protection["rain_protection"] = self.protection["rain_protection"] - 1
             self.protection["river_protection"] = self.protection["river_protection"] - 2
 
+        # If agent goes into debt, reduce satisfaction
+        if self.wealth < 0:
+            self.satisfaction -= 1
     
     def __repr__(self):
 

@@ -13,21 +13,50 @@ if __name__ == "__main__":
 
     agents = initialise_agents()
 
+    # Test huis dict
     # houses_dict = {
     #     "N07": {
     #         "value": 200000,
     #         "available": True,   # gekocht in ronde 1
-    #         "preferred_rating": 0.5,
-    #         "rain_protection": 0,
-    #         "river_protection": 0,
+    #         "preferred_rating": 3,
+    #         "rain_protection": 9,
+    #         "river_protection": 6,
     #         "available_round": 1,
     #     },
     #     "N08": {
     #         "value": 190000,
     #         "available": True,
-    #         "preferred_rating": 0.5,
-    #         "rain_protection": 3,
-    #         "river_protection": 2,
+    #         "preferred_rating": 3,
+    #         "rain_protection": 9,
+    #         "river_protection": 7,
+    #         "available_round": 4,
+    #     },
+    # }
+
+    # TEST VERHUIZEN
+    # houses_dict = {
+    #     "EXPENSIVE_RISKY": {
+    #         "value": 105000,     
+    #         "available": True,
+    #         "preferred_rating": 4,  
+    #         "rain_protection": 5,
+    #         "river_protection": 3,   
+    #         "available_round": 1,
+    #     },
+    #     "CHEAP_SAFE": {
+    #         "value": 105000,
+    #         "available": True,
+    #         "preferred_rating": 3, 
+    #         "rain_protection": 6,
+    #         "river_protection": 4,
+    #         "available_round": 4,
+    #     },
+    #      "CHEAP_SAFE2": {
+    #         "value": 110000,
+    #         "available": True,
+    #         "preferred_rating": 3,  
+    #         "rain_protection": 7,
+    #         "river_protection": 6,
     #         "available_round": 4,
     #     },
     # }
@@ -36,14 +65,17 @@ if __name__ == "__main__":
     for round_nr in range(1, 5):   # rondes 1 t/m 4
         print(f"\n=== ROUND {round_nr} ===")
         flood_results = floods()
-
+        print(f"[DEBUG] Flood results round {round_nr}: {flood_results}")
+        
         for agent in agents:
             agent.step(houses_dict, measures, flood_results, current_round=round_nr)
             # print(agent.adopted_measures)
             # print(len(agent.adopted_measures))
-            print(f"Agent {agent.ID} house after {round_nr}: {agent.house}, protection: {agent.protection}, wealth: {agent.wealth}, floods: {agent.damage_history}, satisfaction: {agent.satisfaction}")
+            print(f"Agent {agent.ID} house after {round_nr}: {agent.house}, protection: {agent.protection}, wealth: {agent.wealth}, satisfaction: {agent.satisfaction},")
+            print(len(agent.adopted_measures))
+            # print(agent.adopted_measures)
 
-    print(houses_dict)
+    # print(houses_dict)
     # # Visualisations
     # pop = PopulationGeneratorRandom()
     # pop.agents = agents          

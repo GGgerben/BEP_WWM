@@ -6,16 +6,6 @@ def initialise_agents():
     Wealth = start savings
     """
 
-    # players_data = [
-    #     {"ID": "p1", "income": 75000,  "max_mortgage": 110000, "start_savings": 5000,  "preferred_rating": 4},
-    #     {"ID": "p2", "income": 110000, "max_mortgage": 170000, "start_savings": 30000, "preferred_rating": 6},
-    #     {"ID": "p3", "income": 60000,  "max_mortgage": 80000,  "start_savings": 0,     "preferred_rating": 3},
-    #     {"ID": "p4", "income": 90000,  "max_mortgage": 130000, "start_savings": 15000, "preferred_rating": 5},
-    #     {"ID": "p5", "income": 130000, "max_mortgage": 200000, "start_savings": 50000, "preferred_rating": 7},
-    #     {"ID": "p6", "income": 190000, "max_mortgage": 300000, "start_savings": 80000, "preferred_rating": 8},
-    #     {"ID": "p7", "income": 110000, "max_mortgage": 170000, "start_savings": 30000, "preferred_rating": 6},
-    #     {"ID": "p8", "income": 110000, "max_mortgage": 170000, "start_savings": 30000, "preferred_rating": 6},
-    # ]
 
     # players_data = [
     #     {"ID": "p1", "income": 35000, "max_mortgage": 110000, "start_savings": 5000,  "preferred_rating": 4},
@@ -28,8 +18,9 @@ def initialise_agents():
     #     {"ID": "p8", "income": 50000, "max_mortgage": 170000, "start_savings": 30000, "preferred_rating": 6},
     # ]
 
+    # TEST 1 player
     players_data = [
-        {"ID": "p5", "income": 45000, "max_mortgage": 200000, "start_savings": 50000, "preferred_rating": 7}
+        {"ID": "p1", "income": 35000, "max_mortgage": 110000, "start_savings": 5000,  "preferred_rating": 4}
     ]
 
     agents = []
