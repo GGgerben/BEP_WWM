@@ -1,4 +1,7 @@
+from classes.policy import Subsidy # type: ignore
+
 class Agent:
+
     def __init__(self, ID, wealth, income, risk_perception, experience_level,
                  self_efficacy, outcome_efficacy, intention, house):
         
@@ -311,7 +314,8 @@ class Agent:
         # Standardize threat appraisal
         return max(0.0, min(threat, 1.0))
     
-    def coping_appraisal_measures(self, measure):
+    def coping_appraisal_measures(self, measure, current_round):
+
         """
         Computes the Coping Appraisal for a specific measure (score [0–1]).
 
@@ -319,6 +323,34 @@ class Agent:
                          – response costs
         """
 
+        # Coping appraisal for flood insurance
+        if measure.name == "Flood insurance":
+            
+            # Higher money pressure → agent feels more financial stress
+            wealth_scale = 100000
+            money_pressure = 1.0 - (self.wealth / (self.wealth + wealth_scale))
+            money_pressure = max(0.0, min(money_pressure, 1.0))
+
+            # Response efficacy for insurance:
+            # Insurance becomes more attractive when money pressure is high
+            response_efficacy = 0.2 + 0.8 * money_pressure
+            response_efficacy = max(0.0, min(response_efficacy, 1.0))
+
+            # Determine affordability using the effective cost
+            effective_cost = self.get_effective_cost(measure, current_round)
+            self_efficacy = 1.0 if self.wealth >= effective_cost else 0.0
+
+            # Response cost: cost relative to current budget
+            total_budget = max(self.wealth, 1.0)
+            response_cost = effective_cost / total_budget
+            response_cost = max(0.0, min(response_cost, 1.0))
+
+            # Calculate coping appraisal
+            coping = response_efficacy + self_efficacy - response_cost
+
+            return max(0.0, min(coping, 1.0))
+        
+        # Coping appraisal for other measures
         # Current protection levels
         current_rain = self.protection.get("rain_protection", 0)
         current_river = self.protection.get("river_protection", 0)
@@ -345,20 +377,21 @@ class Agent:
         risk_reduction = max(0.0, risk_current - risk_new)
 
         # Add satisfaction effects
-
         sat_effect = 0.5 if getattr(measure, "satisfaction", 0) == 1 else 0.0
 
         response_efficacy = max(0.0, min(risk_reduction + sat_effect, 1.0))
 
+        effective_cost = self.get_effective_cost(measure, current_round)
+        
         # Check if agent can pay improvement
-        if self.wealth >= measure.cost:
+        if self.wealth >= effective_cost:
             self_efficacy = 1.0
         else:
             self_efficacy = 0.0
 
         # Calculate response costs
         total_budget = max(self.wealth, 1.0)
-        response_cost = measure.cost / total_budget
+        response_cost = effective_cost / total_budget
         response_cost = max(0.0, min(response_cost, 1.0))
 
         # Calculate coping appraisal
@@ -367,7 +400,7 @@ class Agent:
         # Standardize coping appraisal
         return max(0.0, min(coping, 1.0))
     
-    def measures_PM(self, measure):
+    def measures_PM(self, measure, current_round):
         """
         Computes overall Protection Motivation for adopting a measure.
         Protection Motivation = average of Threat Appraisal and Coping Appraisal,
@@ -375,14 +408,14 @@ class Agent:
         """
 
         threat = self.threat_appraisal_measures()
-        coping = self.coping_appraisal_measures(measure)
+        coping = self.coping_appraisal_measures(measure, current_round)
 
         pm = (threat + coping) / 2.0
 
         return max(0.0, min(pm, 1.0))
 
         
-    def buy_improvements(self, measures, measure_threshold=0.6):
+    def buy_improvements(self, measures, current_round, measure_threshold=0.6):
         
         """
         Buys as many affordable measures as possible from the given list.
@@ -393,11 +426,12 @@ class Agent:
         pm_list = []
         for measure in measures:
 
-            # Skip if this measure is already adopted
-            if any(m.name == measure.name for m in self.adopted_measures):
-                continue
+            # Skip if this measure is already adopted and if measure is not repeatable
+            if not measure.repeatable:
+                if any(m.name == measure.name for (m, r) in self.adopted_measures):
+                    continue
 
-            pm = self.measures_PM(measure)
+            pm = self.measures_PM(measure, current_round)
             pm_list.append((pm, measure))
 
         if not pm_list:
@@ -411,16 +445,19 @@ class Agent:
             # Decide on adoption using a threshold
             if pm <= measure_threshold:
                 continue
+            
+            # Determine effective cost in case of subsidy
+            effective_cost = self.get_effective_cost(measure, current_round)
 
             # Check affordability
-            if self.wealth < measure.cost:
+            if self.wealth < effective_cost:
                 continue
 
             # Pay for the measure
-            self.wealth -= measure.cost
+            self.wealth -= effective_cost
 
             # Add the measure to the agent's list
-            self.adopted_measures.append(measure)
+            self.adopted_measures.append((measure, current_round))
 
             # Update protections cumulatively
             self.protection["rain_protection"] += getattr(measure, "protection_rain", 0)
@@ -459,6 +496,18 @@ class Agent:
 
         # Save damage history
         self.damage_history.append({"rain": rain_diff, "river": river_diff, "damage_cost": total})
+    
+    def get_effective_cost(self, measure, current_round):
+        # Define subsidy round
+        # subsidy_round = 4
+        cost = measure.cost
+
+        # if current_round == subsidy_round and measure.subsidy_percentage > 0:
+        if measure.subsidy_percentage > 0:
+            discounted_cost = cost * measure.subsidy_percentage
+            return discounted_cost
+
+        return cost
 
     def step(self, houses_dict, measures, flood_results, current_round):
         
@@ -469,7 +518,7 @@ class Agent:
         self.get_income()
         self.buy_house(houses_dict, current_round=current_round)
         self.pay_tax()
-        self.buy_improvements(measures)
+        self.buy_improvements(measures, current_round)
         self.check_damage(flood_results)
 
         # Round 3 protection decay

@@ -4,13 +4,15 @@ class Subsidy:
     Represents a one-time subsidy that increases an agent's wealth.
     """
 
-    def __init__(self, amount):
+    def __init__(self, measure, subsidy_percentage = 0.5, active_round = 2):
         # Fixed subsidy amount
-        self.amount = amount
+        self.amount = measure.cost * subsidy_percentage
+        self.active_round = active_round
 
-    def apply(self, agent):
+    def apply(self, agent, current_round):
         # Give the subsidy to the agent
-        agent.wealth += self.amount
+        if self.active_round == current_round:
+            agent.wealth += self.amount
 
 
 class Insurance:
@@ -21,8 +23,6 @@ class Insurance:
     def __init__(self, agent, base_premium,):
         self.agent = agent
         self.base_premium = base_premium
-
-        # self.protection = {"rain_protection": 0, "river_protection": 0}
 
     def calculate_premium(self, house_value):
         
