@@ -1,9 +1,6 @@
-from classes.policy import Subsidy # type: ignore
-
 class Agent:
 
-    def __init__(self, ID, wealth, income, risk_perception, experience_level,
-                 self_efficacy, outcome_efficacy, intention, house):
+    def __init__(self, ID, wealth, income, experience_level, self_efficacy, house, params=None):
         
         """
         Represents a household agent.
@@ -15,19 +12,14 @@ class Agent:
             risk_perception (float): Perceived flood probability and damage risk (0–1).
             experience_level (str): Flood experience: 'Nooit', 'Een keer', or 'Vaker'.
             self_efficacy (float): Belief in own ability to implement measures (0–1).
-            outcome_efficacy (float): Belief that measures effectively reduce damage (0–1).
-            intention (float): Motivational level derived from PMT and MAP (0–1).
             house (string): House id.
         """
 
         self.ID = ID
         self.wealth = wealth
         self.income = income
-        self.risk_perception = risk_perception
         self.experience_level = experience_level
         self.self_efficacy = self_efficacy
-        self.outcome_efficacy = outcome_efficacy
-        self.intention = intention
         self.house = house
 
         # Dynamic attributes updated during simulation
@@ -38,6 +30,14 @@ class Agent:
         self.mortgage = None
         self.protection = {"rain_protection": 0, "river_protection": 0}
         self.satisfaction_history = []
+
+        # Default values parameters (fallbacks)
+        self.params = params or {}
+        self.params.setdefault("damage_costs", 4000)
+        self.params.setdefault("wealth_scale", 100000)
+        self.params.setdefault("measure_threshold", 0.6)
+        self.params.setdefault("relocation_threshold", 0.6)
+        self.params.setdefault("sat_effect_bonus", 0.5)
     
     def get_income(self):
 
@@ -51,6 +51,8 @@ class Agent:
         """
         Pays 10% of the current mortgage.
         """
+        if self.mortgage is None:
+            return
 
         payment = 0.1 * self.mortgage
         self.wealth -= payment
@@ -210,8 +212,8 @@ class Agent:
                     if rating_diff > 0:
                         # Each point below preferred gives –1 satisfaction
                         self.satisfaction -= rating_diff
-                        print(f"[PMT] Agent {self.ID} – Satisfaction -{rating_diff} due to low house rating "
-                            f"(preferred={self.preferred_rating}, house={house_rating})")
+                        # print(f"[PMT] Agent {self.ID} – Satisfaction -{rating_diff} due to low house rating ")
+                        #     f"(preferred={self.preferred_rating}, house={house_rating})")
                                         
                     # Return suitable house
                     return house_id
@@ -252,7 +254,7 @@ class Agent:
 
             # Compute Protection Motivation for relocation to this house
             PM = self.relocation_PM(current_house_info, info)
-            print(f"Agent {self.ID} relocation candidate {house_id}: PM={PM:.2f}")
+            # print(f"Agent {self.ID} relocation candidate {house_id}: PM={PM:.2f}")
 
             if PM > best_PM:
                 best_PM = PM
@@ -303,9 +305,14 @@ class Agent:
 
         # Heuristic, poorer agents have higher benefits from not investing
         # Tuning parameter
-        wealth_scale = 100000
-        money_pressure = 1.0 - (self.wealth / (self.wealth + wealth_scale))
+        wealth_scale = float(self.params.get("wealth_scale", 100000))
+        wealth_scale = max(1.0, wealth_scale)
+
+        w = max(self.wealth, 0.0)  # behandel negatieve wealth als 0 liquid wealth
+        money_pressure = 1.0 - (w / (w + wealth_scale))
         money_pressure = max(0.0, min(money_pressure, 1.0))
+
+
         do_nothing_benefits = 0.05 + 0.15 * money_pressure
         
         # Calculate threat appraisal
@@ -327,8 +334,11 @@ class Agent:
         if measure.name == "Flood insurance":
             
             # Higher money pressure → agent feels more financial stress
-            wealth_scale = 100000
-            money_pressure = 1.0 - (self.wealth / (self.wealth + wealth_scale))
+            wealth_scale = float(self.params.get("wealth_scale", 100000))
+            wealth_scale = max(1.0, wealth_scale)
+
+            w = max(self.wealth, 0.0)
+            money_pressure = 1.0 - (w / (w + wealth_scale))
             money_pressure = max(0.0, min(money_pressure, 1.0))
 
             # Response efficacy for insurance:
@@ -377,8 +387,7 @@ class Agent:
         risk_reduction = max(0.0, risk_current - risk_new)
 
         # Add satisfaction effects
-        sat_effect = 0.5 if getattr(measure, "satisfaction", 0) == 1 else 0.0
-
+        sat_effect = self.params["sat_effect_bonus"] if getattr(measure, "satisfaction", 0) == 1 else 0.0
         response_efficacy = max(0.0, min(risk_reduction + sat_effect, 1.0))
 
         effective_cost = self.get_effective_cost(measure, current_round)
@@ -400,7 +409,7 @@ class Agent:
         # Standardize coping appraisal
         return max(0.0, min(coping, 1.0))
     
-    def measures_PM(self, measure, current_round):
+    def measures_PM(self, measure, current_round, debug = False):
         """
         Computes overall Protection Motivation for adopting a measure.
         Protection Motivation = average of Threat Appraisal and Coping Appraisal,
@@ -412,15 +421,27 @@ class Agent:
 
         pm = (threat + coping) / 2.0
 
+        if debug:
+            effective_cost = self.get_effective_cost(measure, current_round)
+            print(
+                f"[PM DEBUG] agent={self.ID} round={current_round} measure='{measure.name}' | "
+                f"threat={threat:.3f} coping={coping:.3f} PM={pm:.3f} | "
+                f"wealth={self.wealth:.2f} cost={measure.cost:.2f} effective_cost={effective_cost:.2f} "
+                f"subsidy_pct={getattr(measure, 'subsidy_percentage', 0)}"
+            )
+
         return max(0.0, min(pm, 1.0))
 
         
-    def buy_improvements(self, measures, current_round, measure_threshold=0.6):
+    def buy_improvements(self, measures, current_round, measure_threshold=None):
         
         """
         Buys as many affordable measures as possible from the given list.
         Each measure has a 'cost' attribute.
         """
+
+        if measure_threshold is None:
+            measure_threshold = self.params["measure_threshold"]
         
         # Compute PM for all non adopted measures
         pm_list = []
@@ -431,7 +452,7 @@ class Agent:
                 if any(m.name == measure.name for (m, r) in self.adopted_measures):
                     continue
 
-            pm = self.measures_PM(measure, current_round)
+            pm = self.measures_PM(measure, current_round, debug= False)
             pm_list.append((pm, measure))
 
         if not pm_list:
@@ -466,6 +487,13 @@ class Agent:
             # Update satisfaction (+1 or 0 per measure)
             self.satisfaction += getattr(measure, "satisfaction", 0)
 
+            # print(
+            #     f"[BUY] agent={self.ID} round={current_round} "
+            #     f"measure='{measure.name}' PM={pm:.3f} "
+            #     f"cost={effective_cost:.0f} "
+            #     f"wealth_after={self.wealth:.0f}"
+            # )
+
     def check_damage(self, flood_results):
 
         """
@@ -473,7 +501,7 @@ class Agent:
         """
 
         # Fixed damage costs per damage point
-        damage_costs = 4000
+        damage_costs = self.params["damage_costs"]
         
         # calculate difference between damage and protection (never negative)
         rain_diff  = max(0, flood_results.get("rain_damage", 0)  - self.protection["rain_protection"])
@@ -482,11 +510,11 @@ class Agent:
         # Decrease satisfaction if flooded
         if rain_diff > 0:
             self.satisfaction -= rain_diff
-            print("satisfaction -1, rain flood")
+            # print("satisfaction -1, rain flood")
         
         if river_diff > 0:
             self.satisfaction -= river_diff
-            print("satisfaction -1, river flood")
+            # print("satisfaction -1, river flood")
 
         # Calculate total costs
         total = damage_costs * (rain_diff + river_diff)
@@ -499,13 +527,13 @@ class Agent:
     
     def get_effective_cost(self, measure, current_round):
         # Define subsidy round
-        # subsidy_round = 4
+        subsidy_round = 4
         cost = measure.cost
 
-        # if current_round == subsidy_round and measure.subsidy_percentage > 0:
-        if measure.subsidy_percentage > 0:
-            discounted_cost = cost * measure.subsidy_percentage
-            return discounted_cost
+        if current_round == subsidy_round and measure.subsidy_percentage > 0:
+            if measure.subsidy_percentage > 0:
+                discounted_cost = cost * measure.subsidy_percentage
+                return discounted_cost
 
         return cost
 

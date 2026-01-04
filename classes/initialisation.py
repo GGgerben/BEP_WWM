@@ -1,5 +1,9 @@
 from classes.homeowner_agent import Agent # type: ignore
 import matplotlib.pyplot as plt
+import numpy as np
+import random
+import re
+from collections import Counter
 
 
 def initialise_agents():
@@ -32,11 +36,8 @@ def initialise_agents():
             ID=p["ID"],
             wealth=p["start_savings"],   # wealth = start savings
             income=p["income"],
-            risk_perception=0.5,
             experience_level="Nooit",
             self_efficacy=0.5,
-            outcome_efficacy=0.5,
-            intention=0.5,
             house=None
         )
 
@@ -47,8 +48,36 @@ def initialise_agents():
 
     return agents
 
-import matplotlib.pyplot as plt
-import numpy as np
+def initialise_agents_n(n=1000, seed=42):
+    """
+    Create n agents with heterogeneous properties.
+    Uses simple distributions (you can later match these to your game / data).
+    """
+    random.seed(seed)
+
+    agents = []
+    for i in range(1, n + 1):
+        # Example heterogeneity (edit as needed)
+        income = random.choice([30000, 35000, 40000, 45000, 50000, 75000])
+        start_savings = random.choice([0, 2000, 5000, 15000, 30000, 50000, 80000])
+        max_mortgage = random.choice([80000, 110000, 130000, 170000, 200000, 300000])
+        preferred_rating = random.randint(3, 8)
+
+        agent = Agent(
+            ID=f"a{i}",
+            wealth=float(start_savings),
+            income=float(income),
+            experience_level="Nooit",
+            self_efficacy=0.5,
+            house=None
+        )
+
+        agent.max_mortgage = float(max_mortgage)
+        agent.preferred_rating = int(preferred_rating)
+
+        agents.append(agent)
+
+    return agents
 
 # Test grafieken, gemaakt met ai
 def plot_satisfaction_over_time(agents, rounds=4):
@@ -70,7 +99,6 @@ def plot_satisfaction_over_time(agents, rounds=4):
             print(f"Warning: Agent {agent.ID} has no satisfaction_history attribute.")
             continue
 
-        # 👉 Add fixed starting satisfaction point = 5 at round 0
         extended_history = [5] + history
 
         plt.plot(
@@ -242,36 +270,57 @@ def plot_measures_heatmap(agents):
 
 def plot_insurance_usage(agents, insurance_name="Flood insurance"):
     """
-    Plot how often the insurance measure is purchased per round.
-    
-    - x-axis: round
-    - y-axis: number of Flood insurance purchases
+    Stacked bar chart of insurance usage per round:
+    - bottom: first-time purchases
+    - top: repeat purchases
     """
 
-    # Collect (round_nr) for each time insurance is bought
-    purchases_per_round = {}
+    # Dictionaries per round
+    first_time = {}
+    repeat = {}
 
     for agent in agents:
-        for measure, round_nr in agent.adopted_measures:
-            if measure.name == insurance_name:
-                purchases_per_round[round_nr] = purchases_per_round.get(round_nr, 0) + 1
+        insurance_rounds = [
+            round_nr
+            for (measure, round_nr) in agent.adopted_measures
+            if measure.name == insurance_name
+        ]
 
-    if not purchases_per_round:
-        print(f"No purchases found for measure '{insurance_name}'.")
-        return
+        # Sort rounds just to be safe
+        insurance_rounds.sort()
 
-    # Sort rounds and get counts
-    rounds = sorted(purchases_per_round.keys())
-    counts = [purchases_per_round[r] for r in rounds]
+        for i, r in enumerate(insurance_rounds):
+            if i == 0:
+                first_time[r] = first_time.get(r, 0) + 1
+            else:
+                repeat[r] = repeat.get(r, 0) + 1
+
+    # All rounds where insurance was bought
+    all_rounds = sorted(set(first_time.keys()) | set(repeat.keys()))
+
+    first_counts = [first_time.get(r, 0) for r in all_rounds]
+    repeat_counts = [repeat.get(r, 0) for r in all_rounds]
 
     plt.figure(figsize=(8, 5))
-    plt.plot(rounds, counts, marker="o", linewidth=2)
 
-    plt.title(f"Purchases of '{insurance_name}' per round")
+    plt.bar(
+        all_rounds,
+        first_counts,
+        label="First-time purchase"
+    )
+    plt.bar(
+        all_rounds,
+        repeat_counts,
+        bottom=first_counts,
+        label="Repeat purchase"
+    )
+
+    plt.title("Flood insurance purchases per round")
     plt.xlabel("Round")
     plt.ylabel("Number of purchases")
-    plt.grid(True, alpha=0.3)
-    plt.xticks(rounds)
+    plt.xticks(all_rounds)
+    plt.legend()
+    plt.grid(axis="y", alpha=0.3)
 
     plt.tight_layout()
     plt.show()
@@ -315,3 +364,110 @@ def plot_subsidy_effect_summary(agents, measures, subsidized_measure_name):
 
     plt.tight_layout()
     plt.show()
+
+def plot_total_new_measures_per_round(agents):
+    """
+    Plots the total number of newly adopted measures per round
+    (summed over all agents).
+    """
+
+    if not agents:
+        print("No agents to plot.")
+        return
+
+    purchases_per_round = {}
+
+    # Count all adopted measures per round
+    for agent in agents:
+        for measure, round_nr in agent.adopted_measures:
+            purchases_per_round[round_nr] = purchases_per_round.get(round_nr, 0) + 1
+
+    if not purchases_per_round:
+        print("No measures were adopted.")
+        return
+
+    # Sort rounds
+    rounds = sorted(purchases_per_round.keys())
+    counts = [purchases_per_round[r] for r in rounds]
+
+    # Plot
+    plt.figure(figsize=(8, 5))
+    plt.bar(rounds, counts)
+
+    plt.title("Total number of new measures adopted per round")
+    plt.xlabel("Round")
+    plt.ylabel("Number of new measures")
+
+    plt.xticks(rounds)
+    plt.grid(axis="y", alpha=0.3)
+
+    plt.tight_layout()
+    plt.show()
+
+def plot_housing(history):
+    r = history["round"]
+    plt.figure()
+    plt.plot(r, history["available"], marker="o", label="Available houses")
+    plt.plot(r, history["unhoused"], marker="o", label="Unhoused agents")
+    plt.xlabel("Round")
+    plt.ylabel("Count")
+    plt.title("Housing dynamics")
+    plt.legend()
+    plt.tight_layout()
+    plt.show()
+
+def plot_macro_satisfaction(history):
+    r = history["round"]
+    y = history["avg_satisfaction"]
+
+    ymin = min(y)
+    ymax = max(y)
+    margin = 0.1 * (ymax - ymin + 1)
+
+    plt.figure()
+    plt.plot(r, y, marker="o", linewidth=2)
+    plt.xlabel("Round")
+    plt.ylabel("Average satisfaction")
+    plt.title("Average satisfaction over time")
+
+    plt.ylim(ymin - margin, ymax + margin)
+
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.show()
+
+def plot_policy_adoption(history, rounds=(1,2,3,4)):
+    r = history["round"]
+    plt.figure()
+    plt.bar(r, history["new_measures"])
+    plt.xticks(rounds)
+    plt.xlabel("Round")
+    plt.ylabel("New measures adopted (count)")
+    plt.title("Measure adoption per round")
+    plt.tight_layout()
+    plt.show()
+
+def plot_satisfaction_distribution(history):
+    r = history["round"]
+    mean = history["avg_satisfaction"]
+    p10 = history["sat_p10"]
+    p50 = history["sat_p50"]
+    p90 = history["sat_p90"]
+
+    ymin = min(p10 + mean)  # band onderkant of mean, wat lager is
+    ymax = max(p90 + mean)
+    
+    plt.figure()
+    plt.fill_between(r, p10, p90, alpha=0.2, label="P10–P90 band")
+    plt.plot(r, p50, marker="o", linewidth=2, label="Median (P50)")
+    plt.plot(r, mean, marker="o", linewidth=2, label="Mean")
+    plt.axhline(0, linestyle="--", linewidth=1)
+
+    plt.xlabel("Round")
+    plt.ylabel("Satisfaction")
+    plt.title("Satisfaction distribution over time (1000 agents)")
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.show()
+
