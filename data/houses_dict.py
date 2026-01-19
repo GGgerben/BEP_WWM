@@ -39,9 +39,9 @@ def generate_houses_from_agents(
     agents,
     target_n_houses=1200,
     seed=42,
-    affordability_quantile=0.95,   # hoeveel agents moeten minimaal "een kans" hebben
-    house_price_quantile=0.20,     # kijk naar de goedkoopste 20% huizen als "instapsegment"
-    jitter=0.10                    # prijsruis ±10%
+    affordability_quantile=0.95,   
+    house_price_quantile=0.20,     
+    jitter=0.10                    
 ):
     rng = random.Random(seed)
 

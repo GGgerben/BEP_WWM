@@ -33,7 +33,7 @@ measures = [
     Measure("Modest house renovations",      cost= 12000, repeatable= True, rain_protection=0, river_protection=0, satisfaction=1, subsidy_percentage=0.0),
     Measure("Structual house changes",       cost= 12000, repeatable= True, rain_protection=0, river_protection=0, satisfaction=1, subsidy_percentage=0.0),
     Measure("Flood insurance",               cost= 6000, repeatable= True, rain_protection= 0, river_protection=0, satisfaction=1, subsidy_percentage=0.0),
-    Measure("Water pump",                    cost= 6000, repeatable= False, rain_protection=1, river_protection=0, satisfaction=0, subsidy_percentage=0.5),
+    Measure("Water pump",                    cost= 6000, repeatable= False, rain_protection=1, river_protection=0, satisfaction=0, subsidy_percentage=0.0),
     Measure("Self-activating wall",          cost= 12000, repeatable= False, rain_protection=1, river_protection=1, satisfaction=0, subsidy_percentage=0.0),
     Measure("Sandbags",                      cost= 3000, repeatable= False, rain_protection=0, river_protection=1, satisfaction=0, subsidy_percentage=0.0),
     Measure("Waterproofing walls & floors",  cost=20000, repeatable= False, rain_protection=1, river_protection=1, satisfaction=1, subsidy_percentage=0.0),

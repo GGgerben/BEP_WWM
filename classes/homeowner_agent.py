@@ -308,7 +308,7 @@ class Agent:
         wealth_scale = float(self.params.get("wealth_scale", 100000))
         wealth_scale = max(1.0, wealth_scale)
 
-        w = max(self.wealth, 0.0)  # behandel negatieve wealth als 0 liquid wealth
+        w = max(self.wealth, 0.0)  
         money_pressure = 1.0 - (w / (w + wealth_scale))
         money_pressure = max(0.0, min(money_pressure, 1.0))
 
