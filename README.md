@@ -1,10 +1,10 @@
 # Agent Based Model WhereWeMove
 
-## Project Discription
-This project implements an Agent-Based Model (ABM) to simulate interactions between heterogeneous agents in a dynamic environment. The model is inspired by and builds upon the WhereWeMove game developed by Arevalo et al.(2024). The model is used to explore how individual decisions, spatial dynamics and local interactions give rise to emergent system-level outcomes under different scenarios and assumptions.
+## Project Description
+This project implements an Agent-Based Model (ABM) to simulate interactions between heterogeneous agents in a dynamic environment. The model is inspired by and builds upon the WhereWeMove game developed by Arévalo et al.(2024). The model is used to explore how individual decisions, spatial dynamics and local interactions give rise to emergent system-level outcomes under different scenarios and assumptions.
 
 ## Objective
-This Agent-Based Model simulates the behavior and interactions of individual agents to analse how emergent system-level outcomes arise. The model is used to explore scenarios, compare interventions, and understand complex system dynamics.
+This Agent-Based Model simulates the behavior and interactions of individual agents to analyse how emergent system-level outcomes arise. The model is used to explore scenarios, compare interventions, and understand complex system dynamics.
 
 ### Model Overview
 The model is structured as follows:
@@ -18,6 +18,7 @@ The model is structured as follows:
   - **model.py**: Contains the core model logic, including the simulation loop, agent scheduling and environment updates.
 
 ### How to Run
+
 ## Run the model
 The core model logic is implemented in model.py.
 Agents, the environment, and the simulation loop are defined there.
