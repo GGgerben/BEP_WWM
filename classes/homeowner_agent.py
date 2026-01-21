@@ -23,9 +23,9 @@ class Agent:
         self.house = house
 
         # Dynamic attributes updated during simulation
-        self.adopted_measures = []     # List of Measure objects
-        self.satisfaction = 5       # Updated after each round
-        self.damage_history = []       # List of booleans (True = flooded)
+        self.adopted_measures = []     
+        self.satisfaction = 5       
+        self.damage_history = []       
         self.max_mortgage = self.wealth * 10
         self.mortgage = None
         self.protection = {"rain_protection": 0, "river_protection": 0}
