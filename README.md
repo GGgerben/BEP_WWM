@@ -1,7 +1,9 @@
 # Agent Based Model WhereWeMove
 
 ## Project Description
-This project implements an Agent-Based Model (ABM) to simulate interactions between heterogeneous agents in a dynamic environment. The model is inspired by and builds upon the WhereWeMove game developed by Arévalo et al.(2024). The model is used to explore how individual decisions, spatial dynamics and local interactions give rise to emergent system-level outcomes under different scenarios and assumptions.
+The purpose of this agent-based model (ABM) is to analyse the effects of flood risk management policies on homeowners’ adaptation behaviour and satisfaction in a Western European context. The model examines how three policy settings (base case, subsidy and insurance scheme) affect the adoption of flood mitigation measures and relocation decisions at household level.
+
+Homeowners are modelled as heterogeneous agents who make decisions under pluvial and fluvial flood risk,  differing in financial resources, flood experience and housing characteristics. Policy interventions influence decision-making by modifying the costs and availability of protection measures and insurance options. The serious game WhereWeMove (Arevalo et al., 2024 ) provides a conceptual foundation for the model, with game rules and choises translated into computational decision rules to enable systematic policy analysis at the system level.
 
 ## Objective
 This Agent-Based Model simulates the behavior and interactions of individual agents to analyse how emergent system-level outcomes arise. The model is used to explore scenarios, compare interventions, and understand complex system dynamics.
@@ -17,9 +19,9 @@ The model is structured as follows:
   - **export.py**: Handles the exporting of simulation results, such as writing model outputs and summary statistics to CSV files.
   - **model.py**: Contains the core model logic, including the simulation loop, agent scheduling and environment updates.
 
-### How to Run
+## How to Run
 
-## Run the model
+### Run the model
 The core model logic is implemented in model.py.
 Agents, the environment, and the simulation loop are defined there.
 
