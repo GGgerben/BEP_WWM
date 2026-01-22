@@ -99,7 +99,7 @@ To reproduce results from scratch, clear the /results and /plots directories and
 This agent-based model was developed as part of a bachelors’s thesis at Delft University of Technology.
 
 **Thesis title:**  
-*Policy and Behaviour under Flood Risk: A Serious Game Translated into an Agent-Based Model*
+*Policy and Behaviour under Flood Risk: A Serious Game into an Agent-Based Model*
 
 **Author:**  
 Gerben van Diggelen
