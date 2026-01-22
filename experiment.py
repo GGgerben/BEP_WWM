@@ -1,3 +1,15 @@
+"""
+Experiment and plotting runner for the WhereWeMove Agent-Based Model (ABM).
+
+This script:
+1) Defines the policy scenarios (baseline, subsidy, insurance) under two flood regimes
+   (one-shock vs. random floods).
+2) Runs multiple Monte Carlo simulations per scenario (different random seeds) and exports
+   per-agent histories to CSV files in /results.
+3) Loads exported results and reproduces the thesis figures (satisfaction trajectories with
+   uncertainty bands and measure adoption comparisons), saving plots to /plots.
+"""
+
 import copy
 import random
 import os
@@ -14,12 +26,10 @@ from classes.hazard_generator import floods
 from classes.initialisation import initialise_agents_n, initialise_agents
 from export import save_history, initialise_history, update_history, add_round_zero
 
-# houses
 from data.houses_dict import houses_dict
 
 RESULTS_DIR = "results"
 OUT_DIR = "plots"
-
 
 
 @dataclass(frozen=True)
@@ -34,7 +44,6 @@ class Scenario:
     rounds: int = 4
     runs: int = 40
 
-
 SCENARIOS: List[Scenario] = [
     Scenario("one_shock",     "S0", "Baseline",  None,         0.0,  False),
     Scenario("one_shock",     "S2", "Subsidy",   "Self-activating wall", 0.5,  False),
@@ -44,56 +53,18 @@ SCENARIOS: List[Scenario] = [
     Scenario("random_floods", "R3", "Insurance", None,         None, True),
 ]
 
-
 def set_seeds(seed: int) -> None:
     random.seed(seed)
     np.random.seed(seed)
 
-
-def floods_for_round(s: Scenario, round_nr: int):
-    """
-    One shock: ronde 2 vaste flood.
-    Random floods: gebruik bestaande floods() generator.
-    """
-    if s.flood_regime == "one_shock":
-        return {"rain_damage": 10, "river_damage": 12} if round_nr == 2 else {"rain_damage": 0, "river_damage": 0}
-
-    if s.flood_regime == "random_floods":
-        return floods()
-
-    raise ValueError(f"Onbekend flood_regime: {s.flood_regime}")
-
-
-def _find_measure(measures_list, name: str):
-    for m in measures_list:
-        if getattr(m, "name", None) == name:
-            return m
-    raise ValueError(f"Measure met name='{name}' niet gevonden.")
-
-
-def make_policy_measures(s: Scenario):
-    """
-    Maak een kopie van de measures-lijst en pas scenario-instellingen toe.
-    """
-    policy_measures = copy.deepcopy(measures)
-
-    insurance = _find_measure(policy_measures, "Flood insurance")
-
-    # Insurance aan/uit (fallback: cost=inf als Measure geen available attribuut heeft)
-    if hasattr(insurance, "available"):
-        insurance.available = bool(s.insurance_available)
-    else:
-        if not s.insurance_available:
-            insurance.cost = float("inf")
-
-    if s.policy_type == "Subsidy" and s.subsidised_measures:
-        m = _find_measure(policy_measures, s.subsidised_measures)
-        m.subsidy_percentage = float(s.subsidy_level or 0.0)
-
-    return policy_measures
-
-
 def run_once(s: Scenario, seed: int, houses_dict: Dict) -> None:
+    """
+    Run a single simulation for one scenario and random seed.
+
+    Initializes agents and measures, simulates all rounds,
+    and exports agent-level history to a CSV file.
+    """
+
     set_seeds(seed)
 
     history = initialise_history()
@@ -124,6 +95,57 @@ def run_once(s: Scenario, seed: int, houses_dict: Dict) -> None:
         seed=seed,
     )
 
+def floods_for_round(s: Scenario, round_nr: int):
+    """
+    Return flood damage for a given round based on the scenario flood regime.
+
+    One-shock regimes produce a single extreme event,
+    while random regimes sample from the flood generator.
+    """
+
+    if s.flood_regime == "one_shock":
+        return {"rain_damage": 10, "river_damage": 12} if round_nr == 2 else {"rain_damage": 0, "river_damage": 0}
+
+    if s.flood_regime == "random_floods":
+        return floods()
+
+    raise ValueError(f"Unknown flood_regime: {s.flood_regime}")
+
+
+def _find_measure(measures_list, name: str):
+    """
+    Return the first measure with a matching name.
+    Raises ValueError if the measure is not found.
+    """
+
+    for m in measures_list:
+        if getattr(m, "name", None) == name:
+            return m
+    raise ValueError(f"Measure with name='{name}' not found.")
+
+
+def make_policy_measures(s: Scenario):
+    """
+    Create a scenario-specific copy of the measures list.
+
+    Applies policy settings such as subsidy levels and insurance availability.
+    """
+    
+    policy_measures = copy.deepcopy(measures)
+
+    insurance = _find_measure(policy_measures, "Flood insurance")
+
+    if hasattr(insurance, "available"):
+        insurance.available = bool(s.insurance_available)
+    else:
+        if not s.insurance_available:
+            insurance.cost = float("inf")
+
+    if s.policy_type == "Subsidy" and s.subsidised_measures:
+        m = _find_measure(policy_measures, s.subsidised_measures)
+        m.subsidy_percentage = float(s.subsidy_level or 0.0)
+
+    return policy_measures
 
 def run_all_experiments(houses_dict: Dict, base_seed: int = 42) -> None:
     for s in SCENARIOS:
@@ -132,23 +154,19 @@ def run_all_experiments(houses_dict: Dict, base_seed: int = 42) -> None:
             run_once(s, seed=seed, houses_dict=houses_dict)
             print(f"{s.scenario_id} run {i+1}/{s.runs} done (seed={seed})")
 
-    print("\nKlaar. Alles staat in de map: results/")
+    print("\nFinished. Results can be found in: results/")
 
 
 def parse_filename(fp: str) -> dict:
     """
-    Expected filename format (as produced by your save_history):
-    history_R0_random_floods_Baseline_-_0.0_False_N1000_seed43.csv
-
-    We extract scenario_id, flood_regime, policy_type and seed from the filename.
+    Parse scenario metadata (scenario_id, flood_regime, policy_type, seed) from a history CSV filename.
     """
-    name = os.path.basename(fp).replace(".csv", "")
-    left, right = name.split("_N", 1)  # right looks like: "1000_seed43"
 
-    # seed
+    name = os.path.basename(fp).replace(".csv", "")
+    left, right = name.split("_N", 1) 
+
     seed = int(right.split("_seed")[1])
 
-    # left looks like: "history_R0_random_floods_Baseline_-_0.0_False"
     parts = left.split("_")
     if len(parts) < 4 or parts[0] != "history":
         raise ValueError(f"Unexpected filename format: {os.path.basename(fp)}")
@@ -168,15 +186,17 @@ def parse_filename(fp: str) -> dict:
 
 def macro_by_round_from_df(df: pd.DataFrame) -> pd.DataFrame:
     """
-    Compute satisfaction distribution stats per round within ONE run (one CSV).
-    Requires columns: 'round' and 'satisfaction'.
+    Compute per-round satisfaction statistics from agent-level data.
+
+    Calculates mean and percentile bands (P10, P50, P90)
+    for a single simulation run.
     """
+
     if "round" not in df.columns:
         raise KeyError("CSV is missing required column: 'round'")
     if "satisfaction" not in df.columns:
         raise KeyError("CSV is missing required column: 'satisfaction'")
 
-    # Ensure round is numeric
     df = df.copy()
     df["round"] = pd.to_numeric(df["round"], errors="coerce")
     df = df.dropna(subset=["round"])
@@ -245,7 +265,6 @@ def plot_satisfaction_by_scenario(results_dir: str = RESULTS_DIR, out_dir: str =
     macro_all = load_all_satisfaction(results_dir)
     avg = average_over_runs(macro_all)
 
-    # One plot per scenario
     for scenario_id, g in avg.groupby("scenario_id"):
         r = g["round"].tolist()
         mean = g["mean"].tolist()
@@ -288,7 +307,10 @@ def _scenario_from_filename(fp: str) -> str:
 
 
 def load_all_history(results_dir: str = "results") -> pd.DataFrame:
-    """Load all history_*.csv files and add a 'scenario' column from the filename."""
+    """
+    Load all history_*.csv files and add a 'scenario' column from the filename.
+    """
+
     files = glob.glob(os.path.join(results_dir, "history_*.csv"))
     if not files:
         raise FileNotFoundError(f"No history_*.csv found in: {os.path.abspath(results_dir)}")
@@ -301,7 +323,6 @@ def load_all_history(results_dir: str = "results") -> pd.DataFrame:
 
     out = pd.concat(dfs, ignore_index=True)
 
-    # safety: ensure 'round' is numeric
     out["round"] = pd.to_numeric(out["round"], errors="coerce")
     out = out.dropna(subset=["round"])
     out["round"] = out["round"].astype(int)
@@ -310,7 +331,9 @@ def load_all_history(results_dir: str = "results") -> pd.DataFrame:
 
 
 def get_all_measures(df: pd.DataFrame) -> list:
-    """Return sorted list of all measure names that appear in df['measures']."""
+    """
+    Return sorted list of all measure names that appear in df['measures'].
+    """
     all_measures = set()
     for x in df["measures"]:
         all_measures.update(_split_measures_cell(x))
@@ -342,15 +365,17 @@ def compute_measure_adoption(df: pd.DataFrame) -> pd.DataFrame:
     return table
 
 def plot_satisfaction_regime_with_uncertainty(results_dir="results", out_dir="plots"):
-    import os
-    import matplotlib.pyplot as plt
+    """
+    Plot satisfaction trajectories with uncertainty bands per flood regime.
+
+    Aggregates results across simulation runs and visualizes
+    median and percentile ranges for each scenario.
+    """
 
     os.makedirs(out_dir, exist_ok=True)
 
-    # Load your macro data (per run per round)
     macro_all = load_all_satisfaction(results_dir)
 
-    # Average across runs
     avg = average_over_runs(macro_all)
 
     regimes = {
@@ -369,10 +394,7 @@ def plot_satisfaction_regime_with_uncertainty(results_dir="results", out_dir="pl
             p50 = g["p50"]
             p90 = g["p90"]
 
-            # Uncertainty band
             plt.fill_between(r, p10, p90, alpha=0.15)
-
-            # Median line
             plt.plot(r, p50, marker="o", linewidth=2, label=scenario)
 
         plt.axhline(0, linestyle="--", linewidth=1)
@@ -409,12 +431,9 @@ def plot_measure_adoption_by_scenario(results_dir="results", out_dir="plots"):
 
     pairs = [("R0", "R2"), ("R0", "R3"), ("S0", "S2"), ("S0", "S3")]
 
-    # detect agent id column from first file
     sample = pd.read_csv(files[0])
     agent_col = next(c for c in ["agent_id", "id", "unique_id", "agent"] if c in sample.columns)
 
-    # Use ALL data to build the measure list (so nothing is missed)
-    # (still "ever adopted" uses per-run averaging below)
     all_df = []
     for f in files:
         all_df.append(pd.read_csv(f))
@@ -422,7 +441,6 @@ def plot_measure_adoption_by_scenario(results_dir="results", out_dir="plots"):
 
     measures_list = get_all_measures(all_df)
 
-    # ALWAYS include insurance
     if "Flood insurance" not in measures_list:
         measures_list = ["Flood insurance"] + measures_list
 
@@ -450,7 +468,6 @@ def plot_measure_adoption_by_scenario(results_dir="results", out_dir="plots"):
 
                 results[scenario].append(np.mean(per_run) * 100)
 
-        # ---- plot ----
         x = np.arange(len(measures_list))
         width = 0.35
 
@@ -493,7 +510,6 @@ def plot_policy_comparison_adoption_bars(results_dir="results", out_dir="plots")
 
         measures_list = get_all_measures(final)
 
-        # ALWAYS include insurance
         if "Flood insurance" not in measures_list:
             measures_list = ["Flood insurance"] + measures_list
 
@@ -515,7 +531,7 @@ def plot_policy_comparison_adoption_bars(results_dir="results", out_dir="plots")
 
 if __name__ == "__main__":
     # 1) Run experiments (only needed if results/ is empty or you changed the model)
-    # run_all_experiments(houses_dict, base_seed=42)
+    run_all_experiments(houses_dict, base_seed=42)
 
     # 2) Reproduce plots (reads CSVs from results/ and saves PNGs to plots/)
     plot_policy_comparison_adoption_bars("results", "plots")

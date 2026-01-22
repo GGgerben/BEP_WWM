@@ -1,18 +1,24 @@
 class Measure():
-    def __init__(self, name, cost, repeatable, rain_protection, river_protection, satisfaction, subsidy_percentage):
-        
-        """
-        Represents a flood protection or adaptation measure that players can buy 
-        to reduce flood risk or increase satisfaction in the simulation.
+    """
+    Flood adaptation or protection measure available to household agents.
 
-        Attributes:
+    Measures can reduce pluvial and/or fluvial flood risk and/or
+    increase household satisfaction. Some measures are repeatable,
+    others can only be adopted once.
+    """
+
+    def __init__(self, name, cost, repeatable, rain_protection, river_protection, satisfaction, subsidy_percentage):
+        """
+        Initialise a flood adaptation measure.
+
+        Args:
             name (str): Name of the measure.
-            cost (float): One-time purchase or installation cost in euros.
-            repeatable (int): Number of simulation rounds the measure remains effective.
-            protection_rain (float): Effectiveness against pluvial (rain) flooding.
-            protection_river (float): Effectiveness against fluvial (river) flooding.
-            satisfaction (int): Satisfaction points gained by purchasing this measure.
-            remaining_rounds (int): Remaining rounds of effectiveness before expiration.
+            cost (float): Purchase or installation cost (€).
+            repeatable (bool): Whether the measure can be adopted multiple times.
+            rain_protection (int): Reduction in pluvial flood damage.
+            river_protection (int): Reduction in fluvial flood damage.
+            satisfaction (int): Satisfaction points gained when adopted.
+            subsidy_percentage (float): Fraction of cost paid by the agent (0–1).
         """
 
         self.name = name
@@ -27,7 +33,7 @@ class Measure():
     def __repr__(self):
         return f"Measure({self.name!r})"
 
-
+# List of available flood adaptation measures
 measures = [
     Measure("Personal improvements",         cost= 12000, repeatable= True, rain_protection=0, river_protection=0, satisfaction=1, subsidy_percentage=0.0),
     Measure("Modest house renovations",      cost= 12000, repeatable= True, rain_protection=0, river_protection=0, satisfaction=1, subsidy_percentage=0.0),

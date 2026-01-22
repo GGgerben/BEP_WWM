@@ -1,3 +1,11 @@
+"""
+This module handles the collection and storage of simulation history data.
+
+It tracks agent-level outcomes (wealth, satisfaction, flood damage, and
+measure adoption) over multiple rounds and saves the results as CSV files
+for later analysis.
+"""
+
 import pandas as pd
 from classes.homeowner_agent import Agent
 from classes.measures import Measure
@@ -14,6 +22,13 @@ def save_history(
     n_agents,
     seed
 ):
+    """
+    Save the simulation history to a CSV file in the results directory.
+
+    The filename encodes the scenario settings to allow easy comparison
+    across experiments.
+    """
+
     results_dir = Path("results")
     results_dir.mkdir(exist_ok=True)
 
@@ -34,6 +49,10 @@ def save_history(
     print(f"Saved: {path}")
 
 def initialise_history():
+    """
+    Initialise an empty history dictionary for storing simulation outputs.
+    """
+
     return {
         "round": [],
         "agent_id": [],
@@ -46,6 +65,13 @@ def initialise_history():
     }
 
 def update_history(history, agent, flood_results, round_nr):
+    """
+    Append the current round's results for a single agent to the history.
+
+    Tracks changes in wealth, satisfaction, flood damage, and newly adopted
+    measures compared to the previous round.
+    """
+
     history["round"].append(round_nr)
     history["agent_id"].append(agent.ID)
     history["satisfaction"].append(agent.satisfaction)
@@ -64,11 +90,22 @@ def update_history(history, agent, flood_results, round_nr):
     agent._prev_measures_len = len(measure_names)
 
 def _measure_label(m):
+    """
+    Extract the name of a measure, handling tuple or list wrappers.
+    """
+
     if isinstance(m, (tuple, list)):
         m = m[0]
     return m.name
 
 def add_round_zero(history, agents):
+    """
+    Add a baseline (round 0) entry for all agents before the simulation starts.
+
+    Records initial wealth, satisfaction, and already adopted measures,
+    without any flood impacts.
+    """
+    
     for agent in agents:
         history["round"].append(0)
         history["agent_id"].append(agent.ID)

@@ -8,8 +8,14 @@ from collections import Counter
 
 def initialise_agents():
     """
-    Creates and returns 8 agents based on the game table
-    Wealth = start savings
+    Create the baseline population of 8 household agents.
+
+    This function reproduces the fixed player archetypes from the
+    WhereWeMove serious game, including income, savings, mortgage
+    constraints and housing preferences.
+
+    Returns:
+        list[Agent]: List of 8 predefined household agents.
     """
 
     players_data = [
@@ -22,11 +28,6 @@ def initialise_agents():
         {"ID": "p7", "income": 50000, "max_mortgage": 170000, "start_savings": 30000, "preferred_rating": 6},
         {"ID": "p8", "income": 50000, "max_mortgage": 170000, "start_savings": 30000, "preferred_rating": 6},
     ]
-
-    # TEST 1 player
-    # players_data = [
-    #     {"ID": "p1", "income": 35000, "max_mortgage": 110000, "start_savings": 5000,  "preferred_rating": 4}
-    # ]
 
     agents = []
 
@@ -49,14 +50,25 @@ def initialise_agents():
 
 def initialise_agents_n(n=1000, seed=42):
     """
-    Create n agents with heterogeneous properties.
-    Uses simple distributions (you can later match these to your game / data).
+    Create a heterogeneous population of household agents.
+
+    This function generates a larger agent population for
+    large-scale simulations by sampling income, savings,
+    mortgage capacity and housing preferences from
+    predefined distributions.
+
+    Args:
+        n (int): Number of agents to generate.
+        seed (int): Random seed for reproducibility.
+
+    Returns:
+        list[Agent]: List of n heterogeneous household agents.
     """
+
     random.seed(seed)
 
     agents = []
     for i in range(1, n + 1):
-        # Example heterogeneity (edit as needed)
         income = random.choice([30000, 35000, 40000, 45000, 50000, 75000])
         start_savings = random.choice([0, 2000, 5000, 15000, 30000, 50000, 80000])
         max_mortgage = random.choice([80000, 110000, 130000, 170000, 200000, 300000])

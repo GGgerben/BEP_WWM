@@ -1,3 +1,13 @@
+"""
+Utility functions for loading and scaling housing data.
+
+This module converts the Excel-based housing input used in the
+WhereWeMove serious game into a dictionary format suitable for
+agent-based simulations. It also supports upscaling the housing
+stock to larger synthetic populations while preserving affordability
+relationships.
+"""
+
 import pandas as pd 
 import ast
 import random
@@ -9,6 +19,13 @@ df["house_id"] = df["house_id"].astype(str)
 
 # Convert active_measures strings to real lists
 def safe_parse(x):
+    """
+    Safely convert string representations of lists into Python lists.
+
+    Used to parse the 'active_measures' column from the Excel input,
+    which may contain empty values or comma-separated strings.
+    """
+
     if not isinstance(x, str):
         return x
     cleaned = x.strip().strip("[]")     
@@ -43,6 +60,16 @@ def generate_houses_from_agents(
     house_price_quantile=0.20,     
     jitter=0.10                    
 ):
+    """
+    Generate a synthetic housing stock scaled to agent affordability.
+
+    Base houses are replicated and rescaled such that entry-level house
+    prices match the upper affordability of the agent population.
+    Random variation is added to prices and protection levels.
+
+    Returns a dictionary of newly generated houses.
+    """
+
     rng = random.Random(seed)
 
     base_items = list(base_houses_dict.items())
@@ -53,17 +80,16 @@ def generate_houses_from_agents(
     if not budgets:
         raise ValueError("agents is empty")
 
-    # doelbudget: budget van de agent op bv. 95% quantile
+    # Target affordability level (e.g. 95th percentile of agent wealth)
     b_idx = int(affordability_quantile * (len(budgets) - 1))
     b_q = budgets[b_idx]
 
-    # instapprijs uit basis: prijs van goedkoopste X% huizen
+    # Entry-level house price (e.g. 20th percentile of base houses)
     base_values = sorted(float(info["value"]) for _, info in base_items)
     p_idx = int(house_price_quantile * (len(base_values) - 1))
     p_q = base_values[p_idx]
 
-    # schaalfactor zodat "instap-huis" matcht met "doelbudget"
-    # (als p_q te duur is t.o.v. b_q => factor < 1 => huizen goedkoper)
+    # Scale factor to align housing prices with agent affordability
     scale = (b_q / p_q) if p_q > 0 else 1.0
 
     houses = {}
@@ -74,12 +100,12 @@ def generate_houses_from_agents(
         new_info = copy.deepcopy(info)
         new_info["available"] = True
 
-        # prijs = basisprijs * scale * ruis
+        # Scale and jitter house price
         v = float(new_info["value"])
         v = v * scale * rng.uniform(1 - jitter, 1 + jitter)
         new_info["value"] = max(0.0, v)
 
-        # (optioneel) kleine variatie in protections, zoals jij al deed
+        # Optional small variation in protection levels
         if "rain_protection" in new_info:
             new_info["rain_protection"] = max(0, int(round(new_info["rain_protection"] + rng.choice([-1,0,1]))))
         if "river_protection" in new_info:

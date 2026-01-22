@@ -1,11 +1,21 @@
-# Import classes
-from classes.environment import Environment # type: ignore
+"""
+This module runs a single simulation instance of the model.
+
+It is intended for exploratory runs and model behaviour checks with a
+small number of agents (e.g. 8) or an arbitrary number of agents (n),
+allowing inspection of agent decisions, flood impacts, and measure
+adoption over 4 rounds.
+
+The module supports history tracking and visualisation for diagnostic
+and illustrative purposes. Large-scale scenario experiments and
+systematic comparisons are handled separately in experiment.py.
+"""
+
 from classes.homeowner_agent import Agent # type: ignore
 from classes.measures import measures # type: ignore
 from classes.hazard_generator import floods # type: ignore
 from classes.initialisation import (initialise_agents_n, initialise_agents)
 
-# Import plot functions
 from classes.visualise import (plot_macro_satisfaction, plot_satisfaction_distribution, 
                                     plot_subsidy_effect_summary, plot_total_new_measures_per_round, 
                                      plot_satisfaction_over_time, plot_floods_per_round, 
@@ -19,11 +29,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import random
 
-# Import houses
 from data.houses_dict import houses_dict, generate_houses_from_agents # type: ignore
-
-
-
 
 if __name__ == "__main__":
 

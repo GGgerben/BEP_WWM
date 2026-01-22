@@ -1,7 +1,6 @@
 import random
 
 def floods(seed=None):
-
     """
     Simulates the occurrence of rain and river floods.
 

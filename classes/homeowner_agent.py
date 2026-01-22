@@ -1,20 +1,24 @@
 class Agent:
+    """
+    Household agent that makes adaptation and relocation decisions
+    under flood risk using Protection Motivation Theory (PMT).
+    """
 
     def __init__(self, ID, wealth, income, experience_level, self_efficacy, house, params=None):
-        
         """
-        Represents a household agent.
+        Initialize a household agent.
 
-        Attributes:
-            ID (int): Unique identifier per agent.
-            wealth (float): Initial budget in euros (€), determined by social class ('rijk', 'gemiddeld', or 'arm').
-            income (float): Income in euros (€)
-            risk_perception (float): Perceived flood probability and damage risk (0–1).
-            experience_level (str): Flood experience: 'Nooit', 'Een keer', or 'Vaker'.
-            self_efficacy (float): Belief in own ability to implement measures (0–1).
-            house (string): House id.
+        Args:
+            ID (int): Unique agent identifier.
+            wealth (float): Initial wealth (€).
+            income (float): Periodic income (€).
+            experience_level (str): Flood experience category.
+            self_efficacy (float): Perceived ability to act (0–1).
+            house (str or None): Current house ID.
+            params (dict): Model parameters.
         """
 
+        # Static agent attributes
         self.ID = ID
         self.wealth = wealth
         self.income = income
@@ -22,16 +26,20 @@ class Agent:
         self.self_efficacy = self_efficacy
         self.house = house
 
-        # Dynamic attributes updated during simulation
+        # Dynamic state variables
         self.adopted_measures = []     
         self.satisfaction = 5       
         self.damage_history = []       
-        self.max_mortgage = self.wealth * 10
-        self.mortgage = None
-        self.protection = {"rain_protection": 0, "river_protection": 0}
         self.satisfaction_history = []
 
-        # Default values parameters (fallbacks)
+        # Financial constraints
+        self.max_mortgage = self.wealth * 10
+        self.mortgage = None
+
+        # Current protection levels
+        self.protection = {"rain_protection": 0, "river_protection": 0}
+
+        # Model parameters with defaults
         self.params = params or {}
         self.params.setdefault("damage_costs", 4000)
         self.params.setdefault("wealth_scale", 100000)
@@ -40,16 +48,15 @@ class Agent:
         self.params.setdefault("sat_effect_bonus", 0.5)
     
     def get_income(self):
+        """
+        Add income to agent wealth.
+        """
 
-        """
-        Function that allows an agent to get income.
-        """
         self.wealth += self.income
 
     def pay_tax(self):
-
         """
-        Pays 10% of the current mortgage.
+        Pay a fixed fraction of the mortgage each round.
         """
         if self.mortgage is None:
             return
@@ -59,12 +66,14 @@ class Agent:
         self.mortgage -= payment
     
     def compute_flood_probability(self, house_info):
-
         """
-        Function that calculates average rain and river probability.
-        Based on:
-        - rain damage 1-10
-        - river damage 1-12
+        Compute average flood probability based on protection levels.
+
+        Args:
+            house_info (dict): Rain and river protection values.
+
+        Returns:
+            float: Flood probability (0–1).
         """
 
         rain_prot = house_info.get("rain_protection", 0)
@@ -80,9 +89,11 @@ class Agent:
         return (rain_prob + river_prob) / 2 
     
     def flood_experience_factor(self):
-
         """
-        Define flood experience agent (score [0-1]).
+        Translate past flood damage into an experience score.
+
+        Returns:
+            float: Experience factor (0–1).
         """
 
         if not self.damage_history:
@@ -98,7 +109,6 @@ class Agent:
         return max(0.0, min(experienced_floods / n, 1.0))
     
     def threat_appraisal_reloc(self, current_house_info):
-
         """
         Computes the Threat Appraisal for relocation (score [0-1]).
         Threat Appraisal = (flood probability + expected damage + flood experience)
@@ -124,7 +134,6 @@ class Agent:
         return max(0.0, min(threat, 1.0))
     
     def coping_appraisal_reloc(self, current_house_info, new_house_info):
-
         """
         Computes the Coping Appraisal for relocation (score [0-1]).
         Coping Appraisal = (belief that relocation reduces risk + self-efficacy)
@@ -283,7 +292,6 @@ class Agent:
         return None 
     
     def threat_appraisal_measures(self):
-
         """
         Computes the Threat Appraisal for adopting measures (score [0–1]).
 
@@ -322,7 +330,6 @@ class Agent:
         return max(0.0, min(threat, 1.0))
     
     def coping_appraisal_measures(self, measure, current_round):
-
         """
         Computes the Coping Appraisal for a specific measure (score [0–1]).
 
@@ -434,10 +441,8 @@ class Agent:
 
         
     def buy_improvements(self, measures, current_round, measure_threshold=None):
-        
         """
-        Buys as many affordable measures as possible from the given list.
-        Each measure has a 'cost' attribute.
+        Evaluate and adopt mitigation measures based on PMT.
         """
 
         if measure_threshold is None:
@@ -487,17 +492,10 @@ class Agent:
             # Update satisfaction (+1 or 0 per measure)
             self.satisfaction += getattr(measure, "satisfaction", 0)
 
-            # print(
-            #     f"[BUY] agent={self.ID} round={current_round} "
-            #     f"measure='{measure.name}' PM={pm:.3f} "
-            #     f"cost={effective_cost:.0f} "
-            #     f"wealth_after={self.wealth:.0f}"
-            # )
 
     def check_damage(self, flood_results):
-
         """
-        Calculates and applies flood damage based on the agent's protection levels.
+        Apply flood damage and update wealth and satisfaction.
         """
 
         # Fixed damage costs per damage point
@@ -526,7 +524,13 @@ class Agent:
         self.damage_history.append({"rain": rain_diff, "river": river_diff, "damage_cost": total})
     
     def get_effective_cost(self, measure, current_round):
-        # Define subsidy round
+        """
+        Apply subsidy if active.
+
+        Returns:
+            float: Effective measure cost.
+        """
+
         subsidy_round = 4
         cost = measure.cost
 
@@ -538,9 +542,8 @@ class Agent:
         return cost
 
     def step(self, houses_dict, measures, flood_results, current_round):
-        
         """
-        Executes one simulation step where the agent earns income, buys a house, pays taxes, and invests in improvements.
+        Execute one simulation step for the agent.
         """
 
         self.get_income()
