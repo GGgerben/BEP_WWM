@@ -1,31 +1,76 @@
-# Agent Based Model WhereWeMove
+# Agent-Based Model: WhereWeMove Policy Analysis
 
 ## Project Description
-The purpose of this agent-based model (ABM) is to analyse the effects of flood risk management policies on homeowners’ adaptation behaviour and satisfaction in a Western European context. The model examines how three policy settings (base case, subsidy and insurance scheme) affect the adoption of flood mitigation measures and relocation decisions at household level.
+This agent-based model (ABM) is developed to analyse how flood risk management policies influence household adaptation behaviour and perceived satisfaction in a Western European context. The model is explicitly designed to address the following research question:
 
-Homeowners are modelled as heterogeneous agents who make decisions under pluvial and fluvial flood risk,  differing in financial resources, flood experience and housing characteristics. Policy interventions influence decision-making by modifying the costs and availability of protection measures and insurance options. The serious game WhereWeMove (Arevalo et al., 2024 ) provides a conceptual foundation for the model, with game rules and choises translated into computational decision rules to enable systematic policy analysis at the system level.
+> **What is the effect of variations in flood policies (base case, subsidies and insurance schemes) on household flood adaptation behaviour and satisfaction in a Western European context?**
+
+The model examines how different policy settings affect the adoption of flood mitigation measures and relocation decisions at the household level. Three policy regimes are analysed: a baseline scenario without policy intervention, a subsidy scheme targeting a specific mitigation measure, and an insurance scheme offering financial compensation for flood damages.
+
+Homeowners are modelled as heterogeneous agents who differ in financial resources, flood experience, housing characteristics and exposure to pluvial and fluvial flood risk. Policy interventions influence agent decision-making by modifying the costs, availability and attractiveness of mitigation measures and insurance options.
+
+The serious game *WhereWeMove* (Arevalo et al., 2024) provides the conceptual foundation for this model. Game mechanics and decision rules are translated into computational rules, allowing the behavioural logic of the game to be **scaled up** and systematically analysed across many simulation runs and policy scenarios.
+
+---
 
 ## Objective
-This Agent-Based Model simulates the behavior and interactions of individual agents to analyse how emergent system-level outcomes arise. The model is used to explore scenarios, compare interventions, and understand complex system dynamics.
+The primary objective of this agent-based model is **policy analysis** rather than prediction. The model is used to:
 
-### Model Overview
-The model is structured as follows:
+- Compare the behavioural effects of different flood policy regimes  
+- Analyse substitution, crowding-out and moral hazard effects  
+- Examine whether policy-induced behavioural changes translate into differences in satisfaction and inequality  
+- Explore how household-level decision-making aggregates into system-level outcomes  
 
-  - **/classes**: Contains the class definitions used in the model, including the different agent types and supporting classes that define their behavior and interactions.
-  - **/data**: Contains the input data used to initialise the model, including the initial set of houses and their attributes.
-  - **/plots**: Empty directory reserved for future visualisations and plots generated from simulation outputs.
-  - **/results**: Empty directory reserved for future simulation results, stored as CSV files.
-  - **experiment.py**: Script used to configure and run experiments, including scenario definitions, parameter settings and multiple simulation runs.
-  - **export.py**: Handles the exporting of simulation results, such as writing model outputs and summary statistics to CSV files.
-  - **model.py**: Contains the core model logic, including the simulation loop, agent scheduling and environment updates.
+By translating the serious game into an ABM, the model enables **upscaling** from individual gameplay experiences to population-level patterns, providing a controlled environment for testing policy designs before implementation in participatory or real-world settings.
 
-## How to Run
+---
 
-### Run the model
-The core model logic is implemented in model.py.
-Agents, the environment, and the simulation loop are defined there.
+## Model Framework
+The model is implemented using the **Mesa** framework, a widely used Python library for agent-based modelling.
 
-To run all experiments and generate simulation data, execute:
+Mesa provides the core infrastructure for:
+- Agent scheduling and activation  
+- Model stepping and simulation control  
+- Managing agent–environment interactions  
+
+More information about Mesa can be found at:  
+https://mesa.readthedocs.io
+
+---
+
+## Model Structure
+The project is structured as follows:
+
+- **/classes**  
+  Contains class definitions for agents and supporting objects, including household agents, houses, mitigation measures and insurance logic.
+
+- **/data**  
+  Contains input data used to initialise the model, such as housing characteristics and flood-related attributes.
+
+- **/plots**  
+  Directory for figures generated from simulation outputs.
+
+- **/results**  
+  Directory for simulation outputs stored as CSV files.
+
+- **experiment.py**  
+  Main script for configuring and running experiments. Defines policy scenarios, parameter settings and the number of simulation runs.
+
+- **export.py**  
+  Handles exporting model outputs and summary statistics to CSV files.
+
+- **model.py**  
+  Contains the core model logic, including the simulation loop, agent decision-making and environment updates.
+
+---
+
+## How to Run the Model
+
+### Requirements
+Make sure Python is installed and required packages (including Mesa) are available in your environment.
+
+### Running the model via the terminal
+Navigate to the project root directory and run:
 
 ```
 python experiment.py
