@@ -90,6 +90,18 @@ All figures are saved to the /plots directory.
 ## Reproducibility
 To reproduce results from scratch, clear the /results and /plots directories and rerun experiment.py.
 
+## Use of AI
+
+ChatGPT was used exclusively to support the coding process of this agent-based model. Its use was limited to improving code quality and development efficiency and did not influence the conceptual model design, behavioural assumptions, or interpretation of results.
+
+ChatGPT was used for:
+
+- Improving code readability and structure
+- Adding and standardising comments and docstrings
+- Supporting debugging and identifying implementation errors
+- Discussing implementation details to verify that code reflected intended modelling logic
+
+All substantive modelling decisions, simulation results, and analyses were produced by the authors. ChatGPT functioned as a supportive development tool comparable to advanced code editors or peer discussion, and full responsibility for the model and its outcomes remains with the authors.
 
 ## Authors
 - Gerben van Diggelen
