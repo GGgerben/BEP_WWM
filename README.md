@@ -94,3 +94,20 @@ To reproduce results from scratch, clear the /results and /plots directories and
 ## Authors
 - Gerben van Diggelen
 - Juliette Folkers
+
+## Related Thesis
+This agent-based model was developed as part of a bachelors’s thesis at Delft University of Technology.
+
+**Thesis title:**  
+*Policy and Behaviour under Flood Risk: A Serious Game Translated into an Agent-Based Model*
+
+**Author:**  
+Gerben van Diggelen
+
+**Programme:**  
+BSc Technology, Policy and Management, Delft University of Technology
+
+**Year:**  
+2025
+
+The model implements the behavioural mechanisms, policy scenarios and experimental design described in the thesis, and is intended to support transparency, reproducibility and further research.
