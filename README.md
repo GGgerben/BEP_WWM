@@ -134,10 +134,10 @@ The model implements the behavioural mechanisms, policy scenarios and experiment
 **Author:**  
 Juliette Folkers  
 
-**Programme:**
-BSc Technology, Policy and Management, Delft University of Technology
+**Programme:**  
+BSc Technology, Policy and Management, Delft University of Technology  
 
-**Year:**
-2026
+**Year:**  
+2026  
 
 The model implements a scenario-based experimental design focusing on variations in household wealth and prior flood experience. It includes additional analyses, such as sensitivity analysis and statistical testing, to systematically evaluate how these factors influence the adoption of preventive flood measures and overall model outcomes.
