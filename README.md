@@ -129,7 +129,7 @@ BSc Technology, Policy and Management, Delft University of Technology
 The model implements the behavioural mechanisms, policy scenarios and experimental design described in the thesis, and is intended to support transparency, reproducibility and further research.
 
 **Thesis title:**
-From Game to Protection Against Damage: An Agent-Based Model of Flood Adaptation Behaviour
+*From Game to Protection Against Damage: An Agent-Based Model of Flood Adaptation Behaviour*
 
 **Author:**
 Juliette Folkers
