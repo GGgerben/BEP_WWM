@@ -1,4 +1,4 @@
-# Agent-Based Model: WhereWeMove Policy Analysis
+# Agent-Based Model: WhereWeMove Policy Analysis and Household Adaptation under Wealth and Flood Experience
 
 ## Project Description
 This agent-based model (ABM) is developed to analyse how flood risk management policies influence household adaptation behaviour and perceived satisfaction in a Western European context. The model is explicitly designed to address the following research question:
