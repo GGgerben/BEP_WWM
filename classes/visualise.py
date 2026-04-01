@@ -11,6 +11,8 @@ import numpy as np
 import random
 import re
 import pandas as pd
+from matplotlib.ticker import MaxNLocator
+
 
 
 def plot_satisfaction_over_time(agents, rounds=4):
@@ -349,6 +351,7 @@ def plot_satisfaction_distribution(history):
     plt.title("Satisfaction distribution over time")
     plt.legend()
     plt.grid(True, alpha=0.3)
+    plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
     plt.tight_layout()
     plt.show()
 
@@ -372,8 +375,10 @@ def plot_adoption_over_time(history):
     plt.ylabel("Number of agents adopting a measure")
     plt.title("Adoption of flood measures over time")
     plt.grid(alpha=0.3)
+    plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
     plt.tight_layout()
     plt.show()
+    
 
 def plot_measure_adoption_summary(history):
     """
@@ -443,5 +448,30 @@ def plot_insurance_repeats(history, insurance_name="Flood insurance"):
     plt.title("Flood insurance adoption dynamics")
     plt.legend()
     plt.grid(axis="y", alpha=0.3)
+    plt.tight_layout()
+    plt.show()
+
+def plot_wealth_over_time_all_agents(agents):
+    """
+    Plot wealth over time for all agents.
+    Works for any number of agents.
+    
+    """
+    plt.figure()
+
+    for agent in agents:
+        if hasattr(agent, "wealth_history"):
+            plt.plot(agent.wealth_history, label=f"Agent {agent.ID}")
+
+    plt.xlabel("Round")
+    plt.ylabel("Wealth (€)")
+    plt.title("Wealth over time per agent")
+    plt.grid(alpha=0.3)
+
+    plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+    # Alleen legenda tonen als weinig agents (anders chaos)
+    if len(agents) <= 10:
+        plt.legend()
+
     plt.tight_layout()
     plt.show()

@@ -48,6 +48,7 @@ def initialise_agents():
 
     return agents
 
+
 def initialise_agents_n(n=1000, seed=42):
     """
     Create a heterogeneous population of household agents.

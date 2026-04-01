@@ -19,7 +19,8 @@ from classes.initialisation import (initialise_agents_n, initialise_agents)
 from classes.visualise import (plot_macro_satisfaction, plot_satisfaction_distribution, 
                                     plot_subsidy_effect_summary, plot_total_new_measures_per_round, 
                                      plot_satisfaction_over_time, plot_floods_per_round, 
-                                    plot_measures_heatmap, plot_insurance_usage)
+                                    plot_measures_heatmap, plot_insurance_usage,  plot_wealth_over_time_all_agents
+)
 
 from classes.visualise import plot_adoption_over_time, plot_measure_adoption_summary, plot_insurance_repeats
 
@@ -31,6 +32,37 @@ import random
 
 from data.houses_dict import houses_dict, generate_houses_from_agents # type: ignore
 
+def run_single_simulation(seed=None, n_agents=100): #TOEGEVOEGD JULIETTE
+    """
+    Runs ONE model simulation (4 rounds) and returns an output indicator.
+    Used for convergence analysis.
+    """
+
+    random.seed(seed)
+
+    agents = initialise_agents_n(n=n_agents, seed=seed)
+    big_houses_dict = generate_houses_from_agents(
+        houses_dict,
+        agents,
+        target_n_houses=2000,
+        seed=seed,
+        affordability_quantile=0.95,
+        house_price_quantile=0.20,
+        jitter=0.10
+    )
+
+    for round_nr in range(1, 5):
+        flood_results = floods()
+
+        for agent in agents:
+            agent.step(big_houses_dict, measures, flood_results, current_round=round_nr)
+
+    
+    avg_satisfaction = sum(a.satisfaction for a in agents) / len(agents)
+
+    return avg_satisfaction
+
+
 if __name__ == "__main__":
 
     # --------------------------- Initialising data ---------------------------------
@@ -40,15 +72,17 @@ if __name__ == "__main__":
     # agents = initialise_agents() 
 
     # Initialise 1000 agents
-    agents = initialise_agents_n(n=1000, seed=42)
+    agents = initialise_agents_n(n=10, seed=42)
     # Initialise houses
     big_houses_dict = generate_houses_from_agents(houses_dict, agents, target_n_houses=2000, seed=42, affordability_quantile=0.95, 
                                                   house_price_quantile=0.20, jitter=0.10)
+    
     
     # Add history round 0
     add_round_zero(history, agents)
 
     # --------------------------- Running experiment ---------------------------------
+
 
     # Run 4 rounds
     for round_nr in range(1, 5):
@@ -65,7 +99,7 @@ if __name__ == "__main__":
             agent.step(big_houses_dict, measures, flood_results, current_round=round_nr)
             
             update_history(history, agent, flood_results, round_nr)
-    
+        
     # Save results in /results directory (rename before use)
     # save_history(history,'scenario_id', 'flood_regime', 'policy_type', 'measure', 'subsidy_level', 'insurance', 'n_agents', "seed")
         
@@ -121,7 +155,11 @@ if __name__ == "__main__":
 
     # Distribution of agent satisfaction
     # plot_satisfaction_distribution(history)
-        
+    
+
+    # Juliette's toevoegingen:
+    # plot_wealth_over_time_all_agents(agents)
+
 
     
 

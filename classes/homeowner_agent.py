@@ -31,6 +31,8 @@ class Agent:
         self.satisfaction = 5       
         self.damage_history = []       
         self.satisfaction_history = []
+        self.wealth_history = [self.wealth] #toegevoegd
+
 
         # Financial constraints
         self.max_mortgage = self.wealth * 10
@@ -46,6 +48,8 @@ class Agent:
         self.params.setdefault("measure_threshold", 0.6)
         self.params.setdefault("relocation_threshold", 0.6)
         self.params.setdefault("sat_effect_bonus", 0.5)
+        self.params.setdefault("experience_weight", 0.7) #toegevoegd door Juliette
+ 
     
     def get_income(self):
         """
@@ -88,26 +92,36 @@ class Agent:
         # Calculate average flood probability
         return (rain_prob + river_prob) / 2 
     
-    def flood_experience_factor(self):
+    def flood_experience_factor(self) -> float: #aangepast door Juliette
         """
-        Translate past flood damage into an experience score.
+        Experience factor used in PMT.
 
-        Returns:
-            float: Experience factor (0–1).
+        Default behaviour (normal model runs):
+            dynamic experience based on realised flood damage in damage_history.
+
+        Scenario behaviour (only when enabled via params):
+            fixed experience based on categorical experience_level mapping.
         """
+        # --- Scenario override (only if explicitly enabled) ---
+        if self.params.get("experience_source", "dynamic") == "scenario":
+            # Local mapping to avoid import cycles
+            EXPERIENCE_FACTOR = {
+                "Nooit": 0.0,
+                "Een keer": 0.25,
+                "Vaker dan een keer": 0.75,
+            }
+            return float(EXPERIENCE_FACTOR.get(self.experience_level, 0.0))
 
+        # --- Default: dynamic, based on realised damage history ---
         if not self.damage_history:
             return 0.0
-        
-        # Check number of rounds played
+
         n = len(self.damage_history)
+        experienced_floods = sum(1 for d in self.damage_history if d.get("damage_cost", 0) > 0)
 
-        # Check number of experienced floods
-        experienced_floods = sum(1 for d in self.damage_history if d["damage_cost"] > 0)
-
-        # Calculate score
         return max(0.0, min(experienced_floods / n, 1.0))
-    
+
+   
     def threat_appraisal_reloc(self, current_house_info):
         """
         Computes the Threat Appraisal for relocation (score [0-1]).
@@ -308,8 +322,10 @@ class Agent:
         # Floor probability current protection
         flood_prob = self.compute_flood_probability(current_info)
 
-        # Flood experience factor
-        experience = 0.7 * self.flood_experience_factor()
+        # Flood experience factor VERVANGEN JULIETTE
+        exp_w = self.params["experience_weight"]
+        experience = exp_w * self.flood_experience_factor()
+
 
         # Heuristic, poorer agents have higher benefits from not investing
         # Tuning parameter
@@ -551,6 +567,10 @@ class Agent:
         self.pay_tax()
         self.buy_improvements(measures, current_round)
         self.check_damage(flood_results)
+        self.wealth_history.append(self.wealth)
+      
+
+
 
         # Round 3 protection decay
         if current_round == 3:
