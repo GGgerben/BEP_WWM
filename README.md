@@ -11,6 +11,10 @@ Homeowners are modelled as heterogeneous agents who differ in financial resource
 
 The serious game *WhereWeMove* (Arevalo et al., 2024) provides the conceptual foundation for this model. Game mechanics and decision rules are translated into computational rules, allowing the behavioural logic of the game to be **scaled up** and systematically analysed across many simulation runs and policy scenarios.
 
+Building upon this original model, this repository includes an extended version that shifts the focus from policy analysis to the role of household characteristics, specifically wealth and prior flood experience, in shaping adaptation behaviour. This extension addresses the following research question: What is the effect of wealth and prior flood experience on the adoption of preventive flood measures among households? To enable this, a structured scenario framework was implemented in which 27 scenarios are systematically simulated, combining three wealth levels, three experience levels and three population sizes.
+
+In addition, the model was expanded with dedicated analysis scripts to evaluate simulation outcomes. This includes a sensitivity analysis and a one-way ANOVA to statistically assess the influence of key model parameters such as measure thresholds, damage costs and experience weights on adaptation behaviour.
+
 ---
 
 ## Objective
