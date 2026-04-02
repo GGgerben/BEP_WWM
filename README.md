@@ -107,6 +107,8 @@ python experiment.py
 ```
 This runs all scenarios defined in SCENARIOS and stores the results as CSV files in the /results directory.
 
+For the extended model, scenarios are executed via `run_scenarios.py`, which runs all combinations of wealth, flood experience and population size, performs multiple repetitions per scenario, and exports aggregated results to ScenarioResults.xlsx
+
 ## Generate plots
 Plots are generated from the saved CSV files and can be reproduced without rerunning the model.
 Enable the desired plot functions in the __main__ section of experiment.py, for example:
