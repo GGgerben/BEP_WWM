@@ -59,6 +59,9 @@ The project is structured as follows:
 - **/data**  
   Contains input data used to initialise the model, such as housing characteristics and flood-related attributes.
 
+- **/figures_N_effect and /figures_experience_effect and /figures_wealth_effect and make_experience_plots.py and plot_wealth_effect.py**
+  Contain figures showing the effects of population size (N), flood experience and wealth on model outcomes, such as the average number of adopted measures per agent.
+
 - **/plots**  
   Directory for figures generated from simulation outputs.
 
@@ -73,6 +76,21 @@ The project is structured as follows:
 
 - **model.py**  
   Contains the core model logic, including the simulation loop, agent decision-making and environment updates.
+
+- **anova_analysis.py and anova_ervaring.py and anova_results.py and anova_welvaart.py**
+  Perform statistical analyses on the simulation results, including one-way ANOVA and Tukey post-hoc tests, to evaluate differences between wealth and experience groups.
+
+- **run_scenarios.py**
+  Runs all simulation scenarios by varying wealth, flood experience and population size, and aggregates the results for analysis and export.
+
+- **sensitivity.py**
+  Performs sensitivity analysis by varying key model parameters and evaluating their effect on the average number of adopted measures per agent.
+
+- **convergence.py**
+  Tests model convergence by running multiple simulations and tracking the running average of outcomes to assess stability.
+
+- **validation_excel.py**
+  Validates the model by comparing simulation outputs with data from WhereWeMove game sessions, focusing on the distribution of satisfaction over time.
 
 ---
 
