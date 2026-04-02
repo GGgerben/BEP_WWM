@@ -117,7 +117,7 @@ plot_satisfaction_regime_with_uncertainty("results", "plots")
 ```
 All figures are saved to the /plots directory.
 
-For this extended model, plots related to scenario experiments (e.g. wealth, experience and population size effects) are generated separately and stored in dedicated folders (e.g. /figures_wealth_effect, /figures_experience_effect, /figures_N_effect).  
+For the extended model, plots related to scenario experiments (wealth, experience and population size effects) are generated separately and stored in dedicated folders ( /figures_wealth_effect, /figures_experience_effect, /figures_N_effect).  
 
 ## Reproducibility
 To reproduce results from scratch, clear the /results and /plots directories and rerun experiment.py.
