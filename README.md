@@ -27,6 +27,14 @@ The primary objective of this agent-based model is **policy analysis** rather th
 
 By translating the serious game into an ABM, the model enables **upscaling** from individual gameplay experiences to population-level patterns, providing a controlled environment for testing policy designs before implementation in participatory or real-world settings.
 
+(extendend by Juliette)  
+The primary objective of this extended model shifts from policy analysis to understanding household adaptation behaviour under flood risk. The model is used to:
+
+- Analyse how wealth differences influence the adoption of preventive flood measures  
+- Examine how prior flood experience affects threat appraisal and adaptation decisions  
+- Compare behavioural outcomes across different combinations of wealth and experience scenarios  
+- Identify how financial constraints shape not only whether measures are adopted, but also which measures are chosen  
+- Evaluate how individual decision-making processes translate into aggregate patterns of measure adoption  
 ---
 
 ## Model Framework
